@@ -1,9 +1,6 @@
-#!/bin/bash
-
 # CreditGuard AI - README Generator
 # Created for: Bhavesh Suryavanshi (AI Solutions Consultant)
 
-cat << 'EOF' > README.md
 # 🏛️ CreditGuard AI: Institutional Risk & Capital Orchestrator
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -60,7 +57,7 @@ pip install -r requirements.txt
 GOOGLE_API_KEY = "YOUR_API_KEY"
 
 # Launch the orchestrator
-streamlit run app.py
+streamlit run codeapp.py
 \`\`\`
 
 ## 🔒 Security & Compliance
