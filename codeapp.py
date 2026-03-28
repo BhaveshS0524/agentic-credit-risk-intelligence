@@ -128,7 +128,7 @@ with tab4:
             st.error("Please configure GOOGLE_API_KEY in secrets.")
         else:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("models/gemini-1.5-flash")
+            model = genai.GenerativeModel("models/gemini-2.5-flash")
             
             # Context injection for the AI
             context = f"""
