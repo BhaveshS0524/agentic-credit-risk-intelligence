@@ -65,4 +65,4 @@ streamlit run codeapp.py
 * **Contextual Grounding:** The AI Agent is grounded strictly in the provided credit telemetry, ensuring all strategic advice is data-backed and follows financial logic.
 
 ## 👨‍💻 Author
-**Bhavesh Suryavanshi** *AI Solutions Consultant | BFSI Specialist* [LinkedIn Profile]([https://www.linkedin.com/in/your-profile](https://www.linkedin.com/in/bhaveshsuryavanshi/))
+**Bhavesh Suryavanshi** *AI Solutions Consultant | BFSI Specialist* [LinkedIn Profile](https://www.linkedin.com/in/bhaveshsuryavanshi/)
