@@ -23,9 +23,14 @@ if page == "Executive Dashboard":
 
 elif page == "Vintage Analytics":
     with tab2:
-    st.header("Historical Cohort Performance")
-    fig_v = px.line(vintage_df, x='months_on_books', y='cumulative_default_rate', color='vintage')
-    st.plotly_chart(fig_v, use_container_width=True)
+     st.header("Cohort Default Performance (Vintage)")
+    vintages = st.multiselect("Select Vintages to Compare:", vintage_df['vintage'].unique(), default=vintage_df['vintage'].unique()[:3])
+    
+    filtered_vintage = vintage_df[vintage_df['vintage'].isin(vintages)]
+    fig_vintage = px.line(filtered_vintage, x='months_on_books', y='cumulative_default_rate', 
+                          color='vintage', title="Cumulative Default Rate by Months on Books")
+    st.plotly_chart(fig_vintage, use_container_width=True)
+
 
 elif page == "Agentic CRO Desk":
     st.header("🧠 Agentic CRO Intelligence Desk")
