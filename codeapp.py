@@ -13,28 +13,45 @@ from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import tensorflow as tf
 
-# --- MAIN UI STRUCTURE ---
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Executive Dashboard", "Vintage Analytics", "Agentic CRO Desk"])
+# ---------------- 1. SIDEBAR NAVIGATION ----------------
+st.sidebar.title("🏛️ Risk Control Center")
+st.sidebar.markdown("---")
 
-if page == "Executive Dashboard":
-    st.header("📊 Portfolio Overview")
-     
+# This creates the Sidebar Menu
+nav_selection = st.sidebar.radio(
+    "Go to:",
+    ["📈 Portfolio Health", "🌪️ Stress Test Lab", "🍷 Vintage Analysis", "🧠 AI CRO Desk"]
+)
 
-elif page == "Vintage Analytics":
-    with tab2:
-     st.header("Cohort Default Performance (Vintage)")
-    vintages = st.multiselect("Select Vintages to Compare:", vintage_df['vintage'].unique(), default=vintage_df['vintage'].unique()[:3])
-    
-    filtered_vintage = vintage_df[vintage_df['vintage'].isin(vintages)]
-    fig_vintage = px.line(filtered_vintage, x='months_on_books', y='cumulative_default_rate', 
-                          color='vintage', title="Cumulative Default Rate by Months on Books")
-    st.plotly_chart(fig_vintage, use_container_width=True)
+# ---------------- 2. MAIN PAGE ROUTING ----------------
+# We use the 'nav_selection' variable to determine what to show on the main page
 
+if nav_selection == "📈 Portfolio Health":
+    st.header("📈 Executive Portfolio Health")
+    # --- INSERT YOUR KPI & AREA CHART CODE HERE ---
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Total Exposure", f"${latest['total_ead']/1e9:.1f}B")
+    m2.metric("EL Rate", f"{latest['el_rate']*100:.2f}%")
+    # ... etc
 
-elif page == "Agentic CRO Desk":
+elif nav_selection == "🌪️ Stress Test Lab":
+    st.header("🌪️ Macroeconomic Stress Test Lab")
+    # --- INSERT YOUR STRESS TEST SCENARIO CODE HERE ---
+    scenario = st.selectbox("Select Scenario", stress_df['scenario'].unique())
+    # ... etc
+
+elif nav_selection == "🍷 Vintage Analysis":
+    st.header("🍷 Historical Vintage (Cohort) Analysis")
+    # --- INSERT YOUR VINTAGE LINE CHART CODE HERE ---
+    # ... etc
+
+elif nav_selection == "🧠 AI CRO Desk":
     st.header("🧠 Agentic CRO Intelligence Desk")
-    st.markdown("### Neural Stress Testing & Strategic Reasoning")
+    st.markdown("### Neural Network Risk Assessment & Strategic Reasoning")
+    # --- INSERT YOUR ML/DL & GEMINI GENERATION CODE HERE ---
+    if st.button("🚀 Generate Strategic Board Memo"):
+        # run_ai_logic()
+        pass
     
 def calculate_ml_probability():
     # Simulated ML Logic for the Portfolio
