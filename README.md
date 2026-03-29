@@ -1,7 +1,6 @@
 # CreditGuard AI - README Generator
 # Updated with Technical Methodology for BFSI Consultation
 
-cat << 'EOF' > README.md
 # 🏛️ CreditGuard AI: Institutional Risk & Capital Orchestrator
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
