@@ -1,14 +1,13 @@
 # CreditGuard AI - Technical FAQ Generator
 # Designed for: Bhavesh Suryavanshi (AI Solutions Consultant)
 
-cat << 'EOF' > FAQ.md
 # 📑 Technical FAQ & Model Governance
 
 This document provides a deep-dive into the architectural decisions and mathematical frameworks powering **CreditGuard AI**.
 
 ---
 
-### 🔍 Q1: Why use Gemini 1.5 Flash instead of Gemini 1.5 Pro or GPT-4o?
+### 🔍 Q1: Why use Gemini 2.5 Flash instead of Gemini 1.5 Pro or GPT-4o?
 **A:** For the **Agentic CRO Desk**, latency and "Context Window" efficiency are the primary drivers. 
 * **Latency:** Flash offers sub-second reasoning, which is essential for real-time dashboard interaction.
 * **Context Window:** Gemini 1.5's native ability to handle massive tokens allows us to pass raw CSV telemetry (thousands of rows of Vintage and Metric data) directly into the prompt without losing signal through heavy summarization.
