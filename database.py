@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime
 
-DB_NAME = "credit_risk.db"
+DB_NAME = "credit_ratings.db"
 
 
 def init_db():
