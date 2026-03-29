@@ -73,7 +73,9 @@ elif nav_selection == "🍷 Vintage Analysis":
 
 
    elif nav_selection == "🧠 AI CRO Desk:"
-    st.header("🧠 Agentic CRO Intelligence Desk")
+    st.header("Ask the Virtual Chief Risk Officer")
+    user_input = st.text_area("Analyze the current portfolio risks and suggest capital allocation strategies:")
+
     st.markdown("### Neural Stress Testing & Strategic Reasoning")
     
     # --- 1. THE ACTION BUTTON ---
