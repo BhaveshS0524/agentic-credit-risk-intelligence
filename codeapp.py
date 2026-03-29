@@ -292,7 +292,8 @@ if st.button("Generate Strategic Memo"):
                 data=pdf_file,
                 file_name="CRO_Strategic_Memo.pdf",
                 mime="application/pdf"
-            )st.markdown("### 📊 Historical Decisions")
+            )
+st.markdown("### 📊 Historical Decisions")
 
 conn = sqlite3.connect("credit_risk.db")
 df = pd.read_sql("SELECT * FROM decisions ORDER BY id DESC", conn)
