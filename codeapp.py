@@ -72,21 +72,40 @@ elif nav_selection == "🍷 Vintage Analysis":
     st.plotly_chart(fig_vintage, use_container_width=True)
 
 
-   elif nav_selection == "🧠 AI CRO Desk:"
-    st.header("Ask the Virtual Chief Risk Officer")
-    user_input = st.text_area("Analyze the current portfolio risks and suggest capital allocation strategies:")
-
+   elif nav_selection == "🧠 AI CRO Desk":
+    st.header("🧠 Agentic CRO Intelligence Desk")
     st.markdown("### Neural Stress Testing & Strategic Reasoning")
     
-    # --- 1. THE ACTION BUTTON ---
+    # 1. Action Button for the Risk Engine
     if st.button("🚀 Run AI Risk Assessment"):
-        
-        # All logic below MUST be indented further (8 spaces) 
-        # because it is inside the 'if st.button' block
+        # These are indented 8 spaces because they are inside the 'if'
         ml_prob = calculate_ml_probability()
         dl_status = neural_stress_test()
         
         st.success(f"ML Probability of Default: {ml_prob}%")
+        st.info(f"Deep Learning Stress Status: {dl_status}")
+
+        # 2. AI Logic (Gemini)
+        if not api_key:
+            st.error("Please configure GOOGLE_API_KEY in secrets.")
+        else:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-2.5-flash")
+            
+            with st.spinner("CRO is analyzing..."):
+                prompt = f"System: You are a CRO. Context: Exposure {latest['total_ead']}, ML Risk {ml_prob}%. Suggest a mitigation strategy."
+                response = model.generate_content(prompt)
+                st.markdown(response.text)
+
+    st.divider()
+    
+    # 3. Manual Query Section (Indented 4 spaces to stay inside the 'elif')
+    st.header("Ask the Virtual Chief Risk Officer")
+    user_input = st.text_area("Analyze specific portfolio risks or capital strategies:")
+    
+    if st.button("Generate Strategic Memo"):
+        # Logic for manual input here...
+        pass
         
         # --- 2. AI GENERATION ---
         api_key = st.secrets.get("GOOGLE_API_KEY")
