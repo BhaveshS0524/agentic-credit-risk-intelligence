@@ -43,7 +43,6 @@ The "Vintage Auditor" module tracks the **Cumulative Default Rate** by originati
 * **Vintage & Cohort Auditor:** Identifying credit deterioration in newer vintages.
 
 ## 🛠️ Installation & Deployment
-\`\`\`bash
 # Clone the repository
 git clone https://github.com/BhaveshS0524/agentic-credit-risk-intelligence.git
 
