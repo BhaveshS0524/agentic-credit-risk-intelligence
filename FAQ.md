@@ -1,5 +1,5 @@
 # CreditGuard AI - Technical FAQ Generator
-# Designed for: Bhavesh Suryavanshi (AI Solutions Consultant)
+# Designed for: Chief Risk Officers (CROs) and Institutional Credit Analysts.
 
 # 📑 Technical FAQ & Model Governance
 
