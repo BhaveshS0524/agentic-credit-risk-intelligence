@@ -189,14 +189,10 @@ if st.button("🚀 Run Agentic Risk Analysis"):
 
 # 4. LLM + PDF GENERATION (ADD HERE)
 memo_text = None
-
-    res = st.session_state.results
-
+res = st.session_state.results
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel("gemini-2.5-flash")
-
     prompt = f"..."
-
     with st.spinner("AI generating strategic insight..."):
         resp = model.generate_content(prompt)
 
