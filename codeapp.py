@@ -12,6 +12,8 @@ from io import BytesIO
 import re
 import numpy as np
 
+# ---------------- 1. YOUR FUNCTIONS (All kept exactly as provided) ----------------
+
 def calculate_pd(features):
     """Deterministic PD calculation (more realistic than random)"""
     score = (
@@ -22,37 +24,31 @@ def calculate_pd(features):
     )
     return min(max(score, 0), 1)
 
-
-def decision_engine(pd):
-    if pd < 0.3:
+def decision_engine(pd_val):
+    if pd_val < 0.3:
         return "APPROVE"
-    elif pd < 0.7:
+    elif pd_val < 0.7:
         return "REVIEW"
     return "REJECT"
 
-
 def explain_risk(features):
     explanations = []
-
     if features['CreditScore'] < 600:
         explanations.append("Low credit score increasing default risk")
-
     if features['LoanAmount'] > features['Income'] * 5:
         explanations.append("High loan-to-income ratio")
-
     if features['MarketVolatility'] > 60:
         explanations.append("Unstable market conditions")
-
     return explanations if explanations else ["Stable financial profile"]
 
-def risk_category(pd):
-    if pd < 0.3:
+def risk_category(pd_val):
+    if pd_val < 0.3:
         return "LOW RISK"
-    elif pd < 0.7:
+    elif pd_val < 0.7:
         return "MEDIUM RISK"
     return "HIGH RISK"
 
-def business_recommendation(pd, decision):
+def business_recommendation(pd_val, decision):
     if decision == "APPROVE":
         return "Proceed with standard loan approval."
     elif decision == "REVIEW":
@@ -60,32 +56,16 @@ def business_recommendation(pd, decision):
     else:
         return "Reject or reduce loan exposure."
 
-# ---------------- 1. FUNCTIONS (Instructions First) ----------------
-
-def calculate_ml_probability():
-    """Simulated ML Logic for the Portfolio"""
-    return round(np.random.uniform(5.5, 12.8), 2)
-
-def neural_stress_test():
-    """Simulates a Deep Learning risk score"""
-    scores = ["High Risk", "Moderate Risk", "Stable"]
-    return np.random.choice(scores)
-
 def create_cro_report(report_text, metrics_dict):
-    """Generates a professional PDF report for the CRO"""
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter)
     styles = getSampleStyleSheet()
     content = []
-    
     content.append(Paragraph("<b>CONFIDENTIAL: Strategic Risk & Capital Report</b>", styles["Title"]))
     content.append(Spacer(1, 12))
-    
-    # Summary Table
     data = [["Metric", "Value"]]
     for k, v in metrics_dict.items():
         data.append([k, v])
-    
     t = Table(data, colWidths=[200, 100])
     t.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
@@ -95,7 +75,6 @@ def create_cro_report(report_text, metrics_dict):
     ]))
     content.append(t)
     content.append(Spacer(1, 20))
-
     content.append(Paragraph("<b>AI-Generated Risk Assessment:</b>", styles["Heading2"]))
     paragraphs = report_text.split('\n')
     for p in paragraphs:
@@ -103,12 +82,9 @@ def create_cro_report(report_text, metrics_dict):
             clean_p = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', p)
             content.append(Paragraph(clean_p, styles["Normal"]))
             content.append(Spacer(1, 8))
-
     doc.build(content)
     buffer.seek(0)
     return buffer
-
-# ---------------- 2. DATA ORCHESTRATION ----------------
 
 @st.cache_data
 def load_all_data():
@@ -123,33 +99,28 @@ portfolio_df, stress_df, vintage_df = load_all_data()
 latest = portfolio_df.iloc[-1]
 prev = portfolio_df.iloc[-2]
 
-# ---------------- 3. APP UI SETUP ----------------
+# ---------------- 2. APP UI & LOGIC ----------------
 
 st.set_page_config(page_title="CRO Intelligence Desk", layout="wide")
 st.title("🏛️ Institutional Credit Risk & Capital Orchestrator")
 st.markdown("_Advanced Decision Support for BFSI Consultants_")
+api_key = st.secrets.get("GOOGLE_API_KEY")
 
-# ---------------- SESSION STATE INIT ----------------
-# ---------------- SESSION STATE INIT ----------------
+# Initialize Session State
 if "analysis_done" not in st.session_state:
     st.session_state.analysis_done = False
-
 if "results" not in st.session_state:
     st.session_state.results = {}
-
 if "pdf_file" not in st.session_state:
     st.session_state.pdf_file = None
-
 if "history" not in st.session_state:
     st.session_state.history = []
-
 if "logged" not in st.session_state:
     st.session_state.logged = False
 
     st.markdown("### 🧠 Agent Memory (Past Decisions)")
     st.dataframe(pd.DataFrame(st.session_state.history))
 
-# Sidebar
 st.sidebar.header("🤖 AI CRO Settings")
 api_key = st.secrets.get("GOOGLE_API_KEY")
 
@@ -199,69 +170,23 @@ with tab3:
 
 with tab4:
     st.header("🧠 Agentic CRO Intelligence Desk")
-
     st.markdown("### Step 1: Input Borrower Profile")
+col1, col2 = st.columns(2)
+with col1:
+    loan_amount = st.number_input("Loan Amount", value=100000)
+    income = st.number_input("Annual Income", value=50000)
+with col2:
+    credit_score = st.slider("Credit Score", 300, 900, 650)
+    market_vol = st.slider("Market Volatility Index", 0, 100, 40)
 
-    col1, col2 = st.columns(2)
-
-    with col1:
-        loan_amount = st.number_input("Loan Amount", value=100000)
-        income = st.number_input("Annual Income", value=50000)
-
-    with col2:
-        credit_score = st.slider("Credit Score", 300, 900, 650)
-        market_vol = st.slider("Market Volatility Index", 0, 100, 40)
-
-    if st.button("🚀 Run Agentic Risk Analysis"):
-
-        features = {
-            "LoanAmount": loan_amount,
-            "Income": income,
-            "CreditScore": credit_score,
-            "MarketVolatility": market_vol
-        }
-
-        # STEP 1: PD Calculation
-        st.info("Step 2: Risk Scoring Engine Running...")
-        pd_score = calculate_pd(features)
-
-        # STEP 2: Decision
-        st.info("Step 3: Decision Engine Evaluating...")
-        decision = decision_engine(pd_score)
-
-        # STEP 3: Risk Category
-        category = risk_category(pd_score)
-
-        # STEP 4: Explainability
-        st.info("Step 4: Generating Explainability...")
-        explanations = explain_risk(features)
-
-        # STEP 5: Recommendation
-        recommendation = business_recommendation(pd_score, decision)
-
-        # OUTPUTS
-        st.success(f"📊 Probability of Default: {pd_score:.2f}")
-        st.success(f"⚠️ Risk Category: {category}")
-        st.success(f"🏦 Decision: {decision}")
-
-        st.markdown("### 🔍 Key Risk Drivers")
-        for exp in explanations:
-            st.write(f"- {exp}")
-
-        st.markdown("### 💼 Business Recommendation")
-        st.info(recommendation)
-
-        # AGENT MEMORY (IMPROVED)
-        if "history" not in st.session_state:
-            st.session_state.history = []
-
-        st.session_state.history.append({
-            "Loan": loan_amount,
-            "Income": income,
-            "PD": round(pd_score, 2),
-            "Decision": decision,
-            "Category": category
-        })
+# The Main Analysis Button
+if st.button("🚀 Run Agentic Risk Analysis"):
+    features = {
+        'LoanAmount': loan_amount,
+        'Income': income,
+        'CreditScore': credit_score,
+        'MarketVolatility': market_vol
+    }
 
         st.markdown("### 🧠 Agent Memory (Past Decisions)")
         st.dataframe(pd.DataFrame(st.session_state.history))
@@ -289,11 +214,23 @@ memo_text = None
         
             # Define metrics specifically for this report
             pdf_metrics = {
-                "Total Exposure": f"${latest['total_ead']:,.0f}",
+                "Total Exposure": 	f"${latest['total_ead']:,.0f}",
                 "EL Rate": f"{latest['el_rate']*100:.2f}%",
                 "VaR (99%)": f"${latest['var_99']:,.0f}",
                 "HHI Index": f"{latest['sector_hhi']:.4f}"
             }
+
+    # Run Logic
+    st.info("Step 2: Risk Scoring Engine Running...")
+    pd_score = calculate_pd(features)
+    st.info("Step 3: Decision Engine Evaluating...")
+    decision = decision_engine(pd_score)
+    category = risk_category(pd_score)
+    st.info("Step 4: Generating Explainability...")
+    explanations = explain_risk(features)
+    recommendation = business_recommendation(pd_score, decision)
+    
+    # SAVE TO SESSION STATE (Correctly Indented)
 
             # Generate the PDF and store it
             pdf_file = create_cro_report(memo_text, pdf_metrics)
@@ -420,32 +357,46 @@ st.session_state.results = {
 # This must be at the same level as the st.session_state.results line
 st.session_state.analysis_done = True
 
-# 2. Displaying the Results
+# ---------------- 3. DISPLAY RESULTS (Correctly Indented) ----------------
+
 if st.session_state.analysis_done:
     res = st.session_state.results
+    st.divider()
     st.success(f"📊 Probability of Default: {res['pd']:.2f}")
     st.success(f"⚠️ Risk Category: {res['category']}")
     st.success(f"🏦 Decision: {res['decision']}")
     
     st.markdown("### 🔍 Key Risk Drivers")
-    # The for loop content must be indented relative to the loop itself
     for exp in res["explanations"]:
         st.write(f"- {exp}")
 
     st.markdown("### 💼 Business Recommendation")
     st.info(res["recommendation"])
 
-# 5. DOWNLOAD BUTTON (ALWAYS LAST)
-if st.button("Generate Strategic Memo"):
-    # Everything below is indented 4 spaces
-    with st.spinner("Analyzing..."):
-        response = model.generate_content(prompt)
-        memo_text = response.text
-        st.markdown(memo_text)
-        
-        # Line 350 is now safely inside the 'if' block
-        pdf_file = create_cro_report(memo_text, pdf_metrics) 
-        st.download_button("📕 Download PDF", pdf_file, "Memo.pdf")
+    # PDF Generation Button (Must stay inside the results check)
+    if st.button("📝 Generate Strategic Memo"):
+        if not api_key:
+            st.error("Missing Google API Key!")
+        else:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-2.5-flash")
+            
+            # Use current results for context
+            prompt = f"System: CRO. Risk PD: {res['pd']}. Decision: {res['decision']}. Draft a memo."
+            
+            with st.spinner("AI analyzing..."):
+                response = model.generate_content(prompt)
+                memo_text = response.text
+                st.markdown(memo_text)
+                
+                pdf_metrics = {
+                    "PD Score": f"{res['pd']:.2f}",
+                    "Category": res['category'],
+                    "Decision": res['decision']
+                }
+                
+                pdf_file = create_cro_report(memo_text, pdf_metrics) 
+                st.download_button("📕 Download PDF", pdf_file, "CRO_Memo.pdf")
 
 st.markdown("### 📊 Historical Decisions (Audit Log)")
 
