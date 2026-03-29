@@ -132,6 +132,49 @@ with tab3:
                           color='vintage', title="Cumulative Default Rate by Months on Books")
     st.plotly_chart(fig_vintage, use_container_width=True)
 
+# --- MAIN UI STRUCTURE ---
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Go to", ["Executive Dashboard", "Vintage Analytics", "Agentic CRO Desk"])
+
+if page == "Executive Dashboard":
+    st.header("📊 Portfolio Overview")
+    # Your existing map and KPI code...
+
+elif page == "Vintage Analytics":
+    st.header("📅 Historical Vintage Analysis")
+    # Your existing static pool/vintage code...
+
+elif page == "Agentic CRO Desk":
+    st.header("🧠 Agentic CRO Intelligence Desk")
+    st.markdown("### Neural Stress Testing & Strategic Reasoning")
+    
+    # 1. Add your Machine Learning Prediction logic here
+def neural_stress_test(macro_data):
+    # A simple Neural Network to simulate complex banking stress tests
+    nn_model = tf.keras.Sequential([
+        tf.keras.layers.Dense(12, activation='relu', input_shape=(macro_data.shape[1],)),
+        tf.keras.layers.Dense(8, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ])
+    
+    # This predicts 'Portfolio Tail Risk' under stress
+    stress_score = nn_model.predict(macro_data)
+    return stress_score
+
+    # 2. Add your Deep Learning Stress Test here
+# New Agentic Prompt
+prompt = f"""
+You are the Chief Risk Officer AI. 
+The Machine Learning model predicts a {ml_probability}% probability of default.
+The Deep Learning Stress Test shows a {dl_stress_score} impact on Capital Adequacy.
+
+    # 3. Add the Gemini "Strategic Memo" prompt here
+Write a Strategic Memo explaining:
+1. Why the ML model flagged this specific borrower.
+2. How the Stress Test affects our Basel III compliance.
+3. Your final 'Credit Decision' (Approve/Reject/Mitigate).
+"""
+
 # --- TAB 4: AI CRO DESK ---
 with tab4:
     st.header("Ask the Virtual Chief Risk Officer")
@@ -171,26 +214,5 @@ with tab4:
                 st.download_button("📕 Download Executive Memo (PDF)", pdf_file, "CRO_Strategic_Memo.pdf", "application/pdf")
 
 
-def neural_stress_test(macro_data):
-    # A simple Neural Network to simulate complex banking stress tests
-    nn_model = tf.keras.Sequential([
-        tf.keras.layers.Dense(12, activation='relu', input_shape=(macro_data.shape[1],)),
-        tf.keras.layers.Dense(8, activation='relu'),
-        tf.keras.layers.Dense(1, activation='sigmoid')
-    ])
-    
-    # This predicts 'Portfolio Tail Risk' under stress
-    stress_score = nn_model.predict(macro_data)
-    return stress_score
 
-# New Agentic Prompt
-prompt = f"""
-You are the Chief Risk Officer AI. 
-The Machine Learning model predicts a {ml_probability}% probability of default.
-The Deep Learning Stress Test shows a {dl_stress_score} impact on Capital Adequacy.
 
-Write a Strategic Memo explaining:
-1. Why the ML model flagged this specific borrower.
-2. How the Stress Test affects our Basel III compliance.
-3. Your final 'Credit Decision' (Approve/Reject/Mitigate).
-"""
