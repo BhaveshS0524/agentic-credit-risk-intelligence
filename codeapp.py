@@ -128,9 +128,17 @@ st.set_page_config(page_title="CRO Intelligence Desk", layout="wide")
 st.title("🏛️ Institutional Credit Risk & Capital Orchestrator")
 st.markdown("_Advanced Decision Support for BFSI Consultants_")
 
-if st.session_state.analysis_done:
+# ---------------- SESSION STATE INIT ----------------
+if "analysis_done" not in st.session_state:
+    st.session_state.analysis_done = False
 
-    if "history" not in st.session_state:
+if "results" not in st.session_state:
+    st.session_state.results = {}
+
+if "pdf_file" not in st.session_state:
+    st.session_state.pdf_file = None
+
+if "history" not in st.session_state:
         st.session_state.history = []
 
     st.session_state.history.append({
