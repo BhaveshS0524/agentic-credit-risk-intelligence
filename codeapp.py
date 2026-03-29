@@ -171,7 +171,7 @@ with tab1:
     m4.metric("Sector Concentration (HHI)", f"{latest['sector_hhi']:.3f}")
     
     fig_ead = px.area(portfolio_df, x='date', y='total_ead', title="Portfolio Exposure Growth", color_discrete_sequence=['#636EFA'])
-    st.plotly_chart(fig, width='stretch')
+    st.plotly_chart(fig_ead, use_container_width=True)
 
 with tab2:
     st.header("🌪️ Macroeconomic Stress Simulation")
