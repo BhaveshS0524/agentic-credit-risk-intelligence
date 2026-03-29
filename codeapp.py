@@ -171,7 +171,7 @@ with tab1:
     m4.metric("Sector Concentration (HHI)", f"{latest['sector_hhi']:.3f}")
     
     fig_ead = px.area(portfolio_df, x='date', y='total_ead', title="Portfolio Exposure Growth", color_discrete_sequence=['#636EFA'])
-    st.plotly_chart(fig_ead, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 with tab2:
     st.header("🌪️ Macroeconomic Stress Simulation")
@@ -266,34 +266,24 @@ with tab4:
         st.dataframe(pd.DataFrame(st.session_state.history))
 
        # 4. LLM + PDF GENERATION (ADD HERE)
-if st.session_state.get("analysis_done", False) and api_key:
+memo_text = None
 
+if st.session_state.get("analysis_done", False) and api_key:
     res = st.session_state.results
 
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel("gemini-2.5-flash")
 
-    prompt = f"""
-    You are a Chief Risk Officer.
-
-    Borrower Profile:
-    Loan: {res['features']['LoanAmount']}
-    Income: {res['features']['Income']}
-    Credit Score: {res['features']['CreditScore']}
-    Market Volatility: {res['features']['MarketVolatility']}
-
-    PD: {res['pd']}
-    Risk Category: {res['category']}
-    Decision: {res['decision']}
-
-    Provide reasoning and mitigation strategy.
-    """
+    prompt = f"..."
 
     with st.spinner("AI generating strategic insight..."):
         resp = model.generate_content(prompt)
-        memo_text = resp.text
 
-        st.markdown(memo_text)
+        # ✅ MUST be inside
+         memo_text = resp.text
+
+if memo_text:
+    st.markdown(memo_text)
 
         pdf_metrics = {
             "Total Exposure": f"${latest['total_ead']:,.0f}",
@@ -302,8 +292,8 @@ if st.session_state.get("analysis_done", False) and api_key:
             "HHI Index": f"{latest['sector_hhi']:.4f}"
         }
 
-        st.session_state.pdf_file = create_cro_report(memo_text, pdf_metrics)
-                          
+        st.session_state.pdf_file = create_cro_report(memo_text, pdf_metrics)   
+                       
                 # PDF Generation
 pdf_metrics = {
                     "Total Exposure": f"${latest['total_ead']:,.0f}",
