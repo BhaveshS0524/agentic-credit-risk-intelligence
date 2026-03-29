@@ -406,28 +406,34 @@ if st.button("🚀 Run Agentic Risk Analysis"):
    recommendation = business_recommendation(pd_score, decision)
 
 # Store EVERYTHING
-   st.session_state.results = {
-        "pd": pd_score,
-        "decision": decision,
-        "category": category,
-        "explanations": explanations,
-        "recommendation": recommendation,
-        "features": features
-   }
+ # 1. Storing the Analysis Results
+# Everything inside the dictionary must be indented together
+st.session_state.results = {
+    "pd": pd_score,
+    "decision": decision,
+    "category": category,
+    "explanations": explanations,
+    "recommendation": recommendation,
+    "features": features
+}
 
-   st.session_state.analysis_done = True
+# This must be at the same level as the st.session_state.results line
+st.session_state.analysis_done = True
 
+# 2. Displaying the Results
 if st.session_state.analysis_done:
-	   res = st.session_state.results
-   st.success(f"📊 Probability of Default: {res['pd']:.2f}")
-   st.success(f"⚠️ Risk Category: {res['category']}")
-   st.success(f"🏦 Decision: {res['decision']}")
-   st.markdown("### 🔍 Key Risk Drivers")
-   for exp in res["explanations"]:
+    res = st.session_state.results
+    st.success(f"📊 Probability of Default: {res['pd']:.2f}")
+    st.success(f"⚠️ Risk Category: {res['category']}")
+    st.success(f"🏦 Decision: {res['decision']}")
+    
+    st.markdown("### 🔍 Key Risk Drivers")
+    # The for loop content must be indented relative to the loop itself
+    for exp in res["explanations"]:
         st.write(f"- {exp}")
 
-   st.markdown("### 💼 Business Recommendation")
-   st.info(res["recommendation"])
+    st.markdown("### 💼 Business Recommendation")
+    st.info(res["recommendation"])
 
 # 5. DOWNLOAD BUTTON (ALWAYS LAST)
 if st.button("Generate Strategic Memo"):
