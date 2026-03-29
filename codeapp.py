@@ -19,11 +19,21 @@ page = st.sidebar.radio("Go to", ["Executive Dashboard", "Vintage Analytics", "A
 
 if page == "Executive Dashboard":
     st.header("📊 Portfolio Overview")
-    # Your existing map and KPI code...
+    with tab1:
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Total Exposure", f"${latest['total_ead']/1e9:.1f}B")
+    m2.metric("EL Rate", f"{latest['el_rate']*100:.2f}%")
+    m3.metric("99% VaR", f"${latest['var_99']/1e6:.1f}M")
+    
+    fig = px.area(portfolio_df, x='date', y='total_ead', title="Exposure Growth")
+    st.plotly_chart(fig, use_container_width=True)
+
 
 elif page == "Vintage Analytics":
-    st.header("📅 Historical Vintage Analysis")
-    # Your existing static pool/vintage code...
+    with tab2:
+    st.header("Historical Cohort Performance")
+    fig_v = px.line(vintage_df, x='months_on_books', y='cumulative_default_rate', color='vintage')
+    st.plotly_chart(fig_v, use_container_width=True)
 
 elif page == "Agentic CRO Desk":
     st.header("🧠 Agentic CRO Intelligence Desk")
