@@ -301,12 +301,12 @@ if st.session_state.analysis_done and api_key:
         st.session_state.pdf_file = create_cro_report(memo_text, pdf_metrics)
                           
                 # PDF Generation
-                pdf_metrics = {
+pdf_metrics = {
                     "Total Exposure": f"${latest['total_ead']:,.0f}",
                     "EL Rate": f"{latest['el_rate']*100:.2f}%",
                     "VaR (99%)": f"${latest['var_99']:,.0f}",
                     "HHI Index": f"{latest['sector_hhi']:.4f}"
-                }
+	                   }
                 memo_text = resp.text
 st.session_state.pdf_file = pdf_file
 if st.button("🚀 Run Agentic Risk Analysis"):
