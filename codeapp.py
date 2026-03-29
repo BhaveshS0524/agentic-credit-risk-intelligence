@@ -141,7 +141,8 @@ if "pdf_file" not in st.session_state:
 if "history" not in st.session_state:
         st.session_state.history = []
 
-    st.session_state.history.append({
+st.session_state.history.append
+    ({
         "Loan": res["features"]["LoanAmount"],
         "Income": res["features"]["Income"],
         "PD": round(res["pd"], 2),
