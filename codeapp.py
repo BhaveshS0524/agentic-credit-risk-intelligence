@@ -206,7 +206,7 @@ if st.button("🚀 Run Agentic Risk Analysis"):
             with st.spinner("AI generating strategic insight..."):
                 # We use 'response' consistently here
                 response = model.generate_content(prompt)
-                memo_text = resp.text
+                memo_text = response.text
                 
                 # 3. Display and PDF logic (also indented)
                 st.markdown(memo_text)
@@ -272,7 +272,7 @@ if st.button("Generate Strategic Memo"):
         
         # 2. CREATE THE TEXT (This defines 'memo_text')
         response = model.generate_content(prompt)
-        memo_text = resp.text
+        memo_text = response.text
         
         # 3. DISPLAY & PDF (These MUST be indented 4 spaces to see 'memo_text')
         if memo_text:
@@ -389,7 +389,7 @@ pdf_metrics = {
                     "VaR (99%)": f"${latest['var_99']:,.0f}",
                     "HHI Index": f"{latest['sector_hhi']:.4f}"
 	                   }
-memo_text = resp.text
+memo_text = response.text
 st.session_state.pdf_file = pdf_file
 if st.button("🚀 Run Agentic Risk Analysis"):
 
@@ -450,7 +450,7 @@ if st.session_state.analysis_done:
             
             with st.spinner("AI analyzing..."):
                 response = model.generate_content(prompt)
-                memo_text = resp.text
+                memo_text = response.text
                 st.markdown(memo_text)
                 
                 pdf_metrics = {
