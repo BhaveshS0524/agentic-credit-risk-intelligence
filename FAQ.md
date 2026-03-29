@@ -37,6 +37,3 @@ This document provides a deep-dive into the architectural decisions and mathemat
 
 ---
 **Bhavesh Suryavanshi** | *AI Solutions Consultant*
-EOF
-
-echo "✅ FAQ.md has been generated. Your repository is now Enterprise-Ready!"
