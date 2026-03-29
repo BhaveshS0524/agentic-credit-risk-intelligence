@@ -128,6 +128,22 @@ st.set_page_config(page_title="CRO Intelligence Desk", layout="wide")
 st.title("🏛️ Institutional Credit Risk & Capital Orchestrator")
 st.markdown("_Advanced Decision Support for BFSI Consultants_")
 
+if st.session_state.analysis_done:
+
+    if "history" not in st.session_state:
+        st.session_state.history = []
+
+    st.session_state.history.append({
+        "Loan": res["features"]["LoanAmount"],
+        "Income": res["features"]["Income"],
+        "PD": round(res["pd"], 2),
+        "Decision": res["decision"],
+        "Category": res["category"]
+    })
+
+    st.markdown("### 🧠 Agent Memory (Past Decisions)")
+    st.dataframe(pd.DataFrame(st.session_state.history))
+
 # Sidebar
 st.sidebar.header("🤖 AI CRO Settings")
 api_key = st.secrets.get("GOOGLE_API_KEY")
@@ -245,54 +261,45 @@ with tab4:
         st.markdown("### 🧠 Agent Memory (Past Decisions)")
         st.dataframe(pd.DataFrame(st.session_state.history))
 
-        # LLM INSIGHTS
-        if api_key:
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-2.5-flash")
+       # 4. LLM + PDF GENERATION (ADD HERE)
+if st.session_state.analysis_done and api_key:
 
-            prompt = f"""
-            You are a Chief Risk Officer.
+    res = st.session_state.results
 
-            Borrower Profile:
-            Loan: {loan_amount}
-            Income: {income}
-            Credit Score: {credit_score}
-            Market Volatility: {market_vol}
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-2.5-flash")
 
-            PD: {pd_score}
-            Risk Category: {category}
-            Decision: {decision}
+    prompt = f"""
+    You are a Chief Risk Officer.
 
-            Provide:
-            1. Risk reasoning
-            2. Financial risks
-            3. Mitigation strategies
-            """
+    Borrower Profile:
+    Loan: {res['features']['LoanAmount']}
+    Income: {res['features']['Income']}
+    Credit Score: {res['features']['CreditScore']}
+    Market Volatility: {res['features']['MarketVolatility']}
 
-            with st.spinner("AI generating strategic insight..."):
-                resp = model.generate_content(prompt)
-                memo_text = resp.text  # ✅ FIXED
+    PD: {res['pd']}
+    Risk Category: {res['category']}
+    Decision: {res['decision']}
 
-                st.markdown(memo_text)
+    Provide reasoning and mitigation strategy.
+    """
 
-                # PDF Generation
-                pdf_metrics = {
-                    "Total Exposure": f"${latest['total_ead']:,.0f}",
-                    "EL Rate": f"{latest['el_rate']*100:.2f}%",
-                    "VaR (99%)": f"${latest['var_99']:,.0f}",
-                    "HHI Index": f"{latest['sector_hhi']:.4f}"
-                }
+    with st.spinner("AI generating strategic insight..."):
+        resp = model.generate_content(prompt)
+        memo_text = resp.text
 
-                pdf_file = create_cro_report(memo_text, pdf_metrics)
+        st.markdown(memo_text)
 
-                st.download_button(
-                    "📕 Download Executive Memo (PDF)",
-                    pdf_file,
-                    "CRO_Strategic_Memo.pdf",
-                    "application/pdf"
-                )
+        pdf_metrics = {
+            "Total Exposure": f"${latest['total_ead']:,.0f}",
+            "EL Rate": f"{latest['el_rate']*100:.2f}%",
+            "VaR (99%)": f"${latest['var_99']:,.0f}",
+            "HHI Index": f"{latest['sector_hhi']:.4f}"
+        }
 
-          
+        st.session_state.pdf_file = create_cro_report(memo_text, pdf_metrics)
+                          
                 # PDF Generation
                 pdf_metrics = {
                     "Total Exposure": f"${latest['total_ead']:,.0f}",
@@ -301,10 +308,55 @@ with tab4:
                     "HHI Index": f"{latest['sector_hhi']:.4f}"
                 }
                 memo_text = resp.text
-                st.download_button(
-    "📕 Download Executive Memo (PDF)",
-    pdf_file,
-    "CRO_Strategic_Memo.pdf",
-    "application/pdf",
-    key=f"download_{loan_amount}_{income}_{pd_score}"
-)
+st.session_state.pdf_file = pdf_file
+if st.button("🚀 Run Agentic Risk Analysis"):
+
+    features = {
+        "LoanAmount": loan_amount,
+        "Income": income,
+        "CreditScore": credit_score,
+        "MarketVolatility": market_vol
+    }
+
+    pd_score = calculate_pd(features)
+    decision = decision_engine(pd_score)
+    category = risk_category(pd_score)
+    explanations = explain_risk(features)
+    recommendation = business_recommendation(pd_score, decision)
+
+    # Store EVERYTHING
+    st.session_state.results = {
+        "pd": pd_score,
+        "decision": decision,
+        "category": category,
+        "explanations": explanations,
+        "recommendation": recommendation,
+        "features": features
+    }
+
+    st.session_state.analysis_done = True
+
+if st.session_state.analysis_done:
+
+    res = st.session_state.results
+
+    st.success(f"📊 Probability of Default: {res['pd']:.2f}")
+    st.success(f"⚠️ Risk Category: {res['category']}")
+    st.success(f"🏦 Decision: {res['decision']}")
+
+    st.markdown("### 🔍 Key Risk Drivers")
+    for exp in res["explanations"]:
+        st.write(f"- {exp}")
+
+    st.markdown("### 💼 Business Recommendation")
+    st.info(res["recommendation"])
+
+# 5. DOWNLOAD BUTTON (ALWAYS LAST)
+if st.session_state.pdf_file is not None:
+    st.download_button(
+        "📕 Download Executive Memo (PDF)",
+        st.session_state.pdf_file,
+        "CRO_Strategic_Memo.pdf",
+        "application/pdf",
+        key="final_pdf_download"
+    )
