@@ -195,7 +195,7 @@ with tab4:
 # 4. Finally, send it to Gemini
 # response = model.generate_content(prompt)   
 
- st.header("Ask the Virtual Chief Risk Officer")
+st.header("Ask the Virtual Chief Risk Officer")
     user_input = st.text_area("Analyze the current portfolio risks and suggest capital allocation strategies:")
     
     if st.button("Generate Strategic Memo"):
@@ -203,7 +203,7 @@ with tab4:
             st.error("Please configure GOOGLE_API_KEY in secrets.")
         else:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("models/gemini-1.5-flash")
+            model = genai.GenerativeModel("gemini-1.5-flash")
             
             # Context injection for the AI
             context = f"""
@@ -230,7 +230,3 @@ with tab4:
                 
                 pdf_file = create_cro_report(memo_text, pdf_metrics)
                 st.download_button("📕 Download Executive Memo (PDF)", pdf_file, "CRO_Strategic_Memo.pdf", "application/pdf")
-
-
-
-
