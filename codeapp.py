@@ -28,31 +28,90 @@ nav_selection = st.sidebar.radio(
 
 if nav_selection == "📈 Portfolio Health":
     st.header("📈 Executive Portfolio Health")
-    # --- INSERT YOUR KPI & AREA CHART CODE HERE ---
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Total Exposure", f"${latest['total_ead']/1e9:.1f}B")
+
+    latest = portfolio_df.iloc[-1]
+    prev = portfolio_df.iloc[-2]
+    
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Total Exposure (EAD)", f"${latest['total_ead']/1e9:.1f}B", f"{((latest['total_ead']/prev['total_ead'])-1)*100:.1f}%")
     m2.metric("EL Rate", f"{latest['el_rate']*100:.2f}%")
-    # ... etc
+    m3.metric("99% VaR", f"${latest['var_99']/1e6:.1f}M")
+    m4.metric("Sector Concentration (HHI)", f"{latest['sector_hhi']:.3f}")
+    
+    fig_ead = px.area(portfolio_df, x='date', y='total_ead', title="Portfolio Exposure Growth", color_discrete_sequence=['#636EFA'])
+    st.plotly_chart(fig_ead, use_container_width=True)
 
 elif nav_selection == "🌪️ Stress Test Lab":
     st.header("🌪️ Macroeconomic Stress Test Lab")
-    # --- INSERT YOUR STRESS TEST SCENARIO CODE HERE ---
-    scenario = st.selectbox("Select Scenario", stress_df['scenario'].unique())
-    # ... etc
+ 
+    st.header("Macroeconomic Stress Simulation")
+    scenario = st.selectbox("Select Stress Scenario:", stress_df['scenario'].unique())
+    scenario_data = stress_df[stress_df['scenario'] == scenario]
+    
+    col_a, col_b = st.columns(2)
+    
+    with col_a:
+        fig_stress = px.bar(scenario_data, x='sector', y='el_increase_pct', 
+                            title=f"Expected Loss Increase: {scenario}",
+                            color='el_increase_pct', color_continuous_scale='Reds')
+        st.plotly_chart(fig_stress)
+        
+    with col_b:
+        st.write("**Scenario Impact Summary**")
+        st.dataframe(scenario_data[['sector', 'base_pd', 'stressed_pd', 'pd_multiplier']])
+
 
 elif nav_selection == "🍷 Vintage Analysis":
     st.header("🍷 Historical Vintage (Cohort) Analysis")
-    # --- INSERT YOUR VINTAGE LINE CHART CODE HERE ---
-    # ... etc
+    st.header("Cohort Default Performance (Vintage)")
+    vintages = st.multiselect("Select Vintages to Compare:", vintage_df['vintage'].unique(), default=vintage_df['vintage'].unique()[:3])
+    
+    filtered_vintage = vintage_df[vintage_df['vintage'].isin(vintages)]
+    fig_vintage = px.line(filtered_vintage, x='months_on_books', y='cumulative_default_rate', 
+                          color='vintage', title="Cumulative Default Rate by Months on Books")
+    st.plotly_chart(fig_vintage, use_container_width=True)
+
 
 elif nav_selection == "🧠 AI CRO Desk":
     st.header("🧠 Agentic CRO Intelligence Desk")
     st.markdown("### Neural Network Risk Assessment & Strategic Reasoning")
-    # --- INSERT YOUR ML/DL & GEMINI GENERATION CODE HERE ---
-    if st.button("🚀 Generate Strategic Board Memo"):
-        # run_ai_logic()
-        pass
+   st.header("Ask the Virtual Chief Risk Officer")
+    user_input = st.text_area("Analyze the current portfolio risks and suggest capital allocation strategies:")
     
+    if st.button("Generate Strategic Memo"):
+        if not api_key:
+            st.error("Please configure GOOGLE_API_KEY in secrets.")
+        else:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-2.5-flash")
+            
+            # Context injection for the AI
+            context = f"""
+            Current Portfolio Metrics:
+            - Exposure: {latest['total_ead']}
+            - Expected Loss Rate: {latest['el_rate']}
+            - Sector HHI: {latest['sector_hhi']}
+            - 99% VaR: {latest['var_99']}
+            """
+            
+            with st.spinner("CRO is analyzing..."):
+                full_prompt = f"System: You are a Chief Risk Officer at a global bank. Context: {context}. Question: {user_input}"
+                response = model.generate_content(full_prompt)
+                memo_text = response.text
+                st.markdown(memo_text)
+                
+                # Metrics for PDF table
+                pdf_metrics = {
+                    "Total Exposure": f"${latest['total_ead']:,.0f}",
+                    "EL Rate": f"{latest['el_rate']*100:.2f}%",
+                    "VaR (99%)": f"${latest['var_99']:,.0f}",
+                    "HHI Index": f"{latest['sector_hhi']:.4f}"
+                }
+                
+                pdf_file = create_cro_report(memo_text, pdf_metrics)
+                st.download_button("📕 Download Executive Memo (PDF)", pdf_file, "CRO_Strategic_Memo.pdf", "application/pdf")
+
+
 def calculate_ml_probability():
     # Simulated ML Logic for the Portfolio
     return round(np.random.uniform(5.5, 12.8), 2)
