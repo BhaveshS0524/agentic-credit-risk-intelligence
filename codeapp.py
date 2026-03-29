@@ -165,7 +165,7 @@ with tab3:
     filtered_vintage = vintage_df[vintage_df['vintage'].isin(vintages)]
     fig_vintage = px.line(filtered_vintage, x='months_on_books', y='cumulative_default_rate', 
                           color='vintage', title="Cumulative Default Rate by Months on Books")
-    st.plotly_chart(fig_vintage, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 with tab4:
     st.header("🧠 Agentic CRO Intelligence Desk")
@@ -241,11 +241,23 @@ pd_score = calculate_pd(features)
 st.info("Step 3: Decision Engine Evaluating...")
 decision = decision_engine(pd_score)
 category = risk_category(pd_score)
+explanations = explain_risk(features)
+recommendation = business_recommendation(pd_score, decision)
 st.info("Step 4: Generating Explainability...")
 explanations = explain_risk(features)
 recommendation = business_recommendation(pd_score, decision)
     
     # SAVE TO SESSION STATE (Correctly Indented)
+st.session_state.results = {
+        "pd": pd_score,
+        "decision": decision,
+        "category": category,
+        "explanations": explanations,
+        "recommendation": recommendation,
+        "features": features
+    }
+st.session_state.analysis_done = True
+st.success("Analysis Complete!")
 
 # Generate the PDF and store it
 pdf_file = create_cro_report(memo_text, pdf_metrics)
