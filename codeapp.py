@@ -235,15 +235,15 @@ pdf_metrics = {
         "HHI Index": f"{latest['sector_hhi']:.4f}"
             }
 
-    # Run Logic
-    st.info("Step 2: Risk Scoring Engine Running...")
-    pd_score = calculate_pd(features)
-    st.info("Step 3: Decision Engine Evaluating...")
-    decision = decision_engine(pd_score)
-    category = risk_category(pd_score)
-    st.info("Step 4: Generating Explainability...")
-    explanations = explain_risk(features)
-    recommendation = business_recommendation(pd_score, decision)
+# Run Logic
+st.info("Step 2: Risk Scoring Engine Running...")
+pd_score = calculate_pd(features)
+st.info("Step 3: Decision Engine Evaluating...")
+decision = decision_engine(pd_score)
+category = risk_category(pd_score)
+st.info("Step 4: Generating Explainability...")
+explanations = explain_risk(features)
+recommendation = business_recommendation(pd_score, decision)
     
     # SAVE TO SESSION STATE (Correctly Indented)
 
