@@ -11,11 +11,11 @@ from reportlab.lib import colors
 from io import BytesIO
 import re
 import numpy as np
+from datetime import datetime
 
-# ---------------- 1. YOUR FUNCTIONS (All kept exactly as provided) ----------------
+# ---------------- 1. CORE ENGINES (Calculations) ----------------
 
 def calculate_pd(features):
-    """Deterministic PD calculation (more realistic than random)"""
     score = (
         0.3 * (features['LoanAmount'] / 500000) +
         0.2 * (1 - features['CreditScore'] / 900) +
@@ -25,36 +25,26 @@ def calculate_pd(features):
     return min(max(score, 0), 1)
 
 def decision_engine(pd_val):
-    if pd_val < 0.3:
-        return "APPROVE"
-    elif pd_val < 0.7:
-        return "REVIEW"
+    if pd_val < 0.3: return "APPROVE"
+    elif pd_val < 0.7: return "REVIEW"
     return "REJECT"
 
 def explain_risk(features):
     explanations = []
-    if features['CreditScore'] < 600:
-        explanations.append("Low credit score increasing default risk")
-    if features['LoanAmount'] > features['Income'] * 5:
-        explanations.append("High loan-to-income ratio")
-    if features['MarketVolatility'] > 60:
-        explanations.append("Unstable market conditions")
+    if features['CreditScore'] < 600: explanations.append("Low credit score increasing default risk")
+    if features['LoanAmount'] > features['Income'] * 5: explanations.append("High loan-to-income ratio")
+    if features['MarketVolatility'] > 60: explanations.append("Unstable market conditions")
     return explanations if explanations else ["Stable financial profile"]
 
 def risk_category(pd_val):
-    if pd_val < 0.3:
-        return "LOW RISK"
-    elif pd_val < 0.7:
-        return "MEDIUM RISK"
+    if pd_val < 0.3: return "LOW RISK"
+    elif pd_val < 0.7: return "MEDIUM RISK"
     return "HIGH RISK"
 
 def business_recommendation(pd_val, decision):
-    if decision == "APPROVE":
-        return "Proceed with standard loan approval."
-    elif decision == "REVIEW":
-        return "Request additional documents or collateral."
-    else:
-        return "Reject or reduce loan exposure."
+    if decision == "APPROVE": return "Proceed with standard loan approval."
+    elif decision == "REVIEW": return "Request additional documents or collateral."
+    else: return "Reject or reduce loan exposure."
 
 def create_cro_report(report_text, metrics_dict):
     buffer = BytesIO()
@@ -86,397 +76,116 @@ def create_cro_report(report_text, metrics_dict):
     buffer.seek(0)
     return buffer
 
+# ---------------- 2. DATABASE & DATA INIT ----------------
+
+def init_db():
+    conn = sqlite3.connect("credit_risk.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS decisions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            loan_amount REAL,
+            income REAL,
+            credit_score INTEGER,
+            market_volatility INTEGER,
+            pd REAL,
+            decision TEXT,
+            category TEXT,
+            timestamp TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
+
 @st.cache_data
 def load_all_data():
     portfolio = pd.read_csv("portfolio_metrics.csv")
     stress = pd.read_csv("macro_stress_scenarios.csv")
     vintage = pd.read_csv("vintage_analysis.csv")
-    # ratings = pd.read_csv("credit_ratings.csv")
     return portfolio, stress, vintage
 
-# Start loading
 portfolio_df, stress_df, vintage_df = load_all_data()
 latest = portfolio_df.iloc[-1]
 prev = portfolio_df.iloc[-2]
 
-# ---------------- 2. APP UI & LOGIC ----------------
+# ---------------- 3. UI SETUP ----------------
 
 st.set_page_config(page_title="CRO Intelligence Desk", layout="wide")
 st.title("🏛️ Institutional Credit Risk & Capital Orchestrator")
-st.markdown("_Advanced Decision Support for BFSI Consultants_")
+
+if "results" not in st.session_state: st.session_state.results = None
 api_key = st.secrets.get("GOOGLE_API_KEY")
 
-# Initialize Session State
-if "analysis_done" not in st.session_state:
-    st.session_state.analysis_done = False
-if "results" not in st.session_state:
-    st.session_state.results = {}
-if "pdf_file" not in st.session_state:
-    st.session_state.pdf_file = None
-if "history" not in st.session_state:
-    st.session_state.history = []
-if "logged" not in st.session_state:
-    st.session_state.logged = False
-    st.markdown("### 🧠 Agent Memory (Past Decisions)")
-    st.dataframe(pd.DataFrame(st.session_state.history))
+tab1, tab2, tab3, tab4 = st.tabs(["📈 Portfolio", "🌪️ Stress Test", "🍷 Vintage", "🧠 AI CRO Desk"])
 
-    st.sidebar.header("🤖 AI CRO Settings")
-    api_key = st.secrets.get("GOOGLE_API_KEY")
-
-# Create Tabs
-tab1, tab2, tab3, tab4 = st.tabs([
-    "📈 Portfolio Health", 
-    "🌪️ Stress Test Lab", 
-    "🍷 Vintage Analysis", 
-    "🧠 AI CRO Desk"
-])
-
-# ---------------- 4. TAB LOGIC ----------------
-
-with tab1:
-    st.header("📈 Executive Portfolio Health")
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Total Exposure (EAD)", f"${latest['total_ead']/1e9:.1f}B", f"{((latest['total_ead']/prev['total_ead'])-1)*100:.1f}%")
-    m2.metric("EL Rate", f"{latest['el_rate']*100:.2f}%")
-    m3.metric("99% VaR", f"${latest['var_99']/1e6:.1f}M")
-    m4.metric("Sector Concentration (HHI)", f"{latest['sector_hhi']:.3f}")
-    
-    fig_ead = px.area(portfolio_df, x='date', y='total_ead', title="Portfolio Exposure Growth", color_discrete_sequence=['#636EFA'])
-    st.plotly_chart(fig_ead, width='stretch')
-
-with tab2:
-    st.header("🌪️ Macroeconomic Stress Simulation")
-    scenario = st.selectbox("Select Stress Scenario:", stress_df['scenario'].unique())
-    scenario_data = stress_df[stress_df['scenario'] == scenario]
-    
-    col_a, col_b = st.columns(2)
-    with col_a:
-        fig_stress = px.bar(scenario_data, x='sector', y='el_increase_pct', 
-                            title=f"Expected Loss Increase: {scenario}",
-                            color='el_increase_pct', color_continuous_scale='Reds')
-        st.plotly_chart(fig_stress)
-    with col_b:
-        st.write("**Scenario Impact Summary**")
-        st.dataframe(scenario_data[['sector', 'base_pd', 'stressed_pd', 'pd_multiplier']])
-
-with tab3:
-    st.header("🍷 Historical Vintage (Cohort) Analysis")
-    vintages = st.multiselect("Select Vintages to Compare:", vintage_df['vintage'].unique(), default=vintage_df['vintage'].unique()[:3])
-    filtered_vintage = vintage_df[vintage_df['vintage'].isin(vintages)]
-    fig_vintage = px.line(filtered_vintage, x='months_on_books', y='cumulative_default_rate', 
-                          color='vintage', title="Cumulative Default Rate by Months on Books")
-    st.plotly_chart(fig_vintage, width='stretch')
+# ---------------- 4. TAB LOGIC (The AI Desk) ----------------
 
 with tab4:
     st.header("🧠 Agentic CRO Intelligence Desk")
-    st.markdown("### Step 1: Input Borrower Profile")
-col1, col2 = st.columns(2)
-with col1:
-    loan_amount = st.number_input("Loan Amount", value=100000)
-    income = st.number_input("Annual Income", value=50000)
-with col2:
-    credit_score = st.slider("Credit Score", 300, 900, 650)
-    market_vol = st.slider("Market Volatility Index", 0, 100, 40)
+    col1, col2 = st.columns(2)
+    with col1:
+        loan_amount = st.number_input("Loan Amount", value=100000)
+        income = st.number_input("Annual Income", value=50000)
+    with col2:
+        credit_score = st.slider("Credit Score", 300, 900, 650)
+        market_vol = st.slider("Market Volatility Index", 0, 100, 40)
 
-# The Main Analysis Button
-if st.button("🚀 Run Agentic Risk Analysis"):
-    features = {
-        'LoanAmount': loan_amount,
-        'Income': income,
-        'CreditScore': credit_score,
-        'MarketVolatility': market_vol
-    }
+    if st.button("🚀 Run Agentic Risk Analysis"):
+        features = {"LoanAmount": loan_amount, "Income": income, "CreditScore": credit_score, "MarketVolatility": market_vol}
+        
+        pd_score = calculate_pd(features)
+        decision = decision_engine(pd_score)
+        category = risk_category(pd_score)
+        
+        st.session_state.results = {
+            "pd": pd_score, "decision": decision, "category": category,
+            "explanations": explain_risk(features),
+            "recommendation": business_recommendation(pd_score, decision)
+        }
+        
+        # Save to Database
+        conn = sqlite3.connect("credit_risk.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO decisions (loan_amount, income, credit_score, market_volatility, pd, decision, category, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                       (loan_amount, income, credit_score, market_vol, pd_score, decision, category, datetime.now().isoformat()))
+        conn.commit()
+        conn.close()
 
-# 4. LLM + PDF GENERATION (ADD HERE)
-# 1. Start with the button
-    if st.button("Generate Strategic Memo"):
-        # 2. All these lines below must be indented 4 spaces
-        memo_text = None
+    if st.session_state.results:
         res = st.session_state.results
+        st.success(f"📊 PD: {res['pd']:.2f} | Category: {res['category']} | Decision: {res['decision']}")
         
-        if not api_key:
-            st.error("Missing API Key!")
-        else:
-            genai.configure(api_key=api_key)
-            # Use 1.5-flash for better stability in 2026
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            
-            prompt = f"System: CRO. Risk PD: {res['pd']:.2f}. Decision: {res['decision']}. Draft memo."
-            
-            with st.spinner("AI generating strategic insight..."):
-                # We use 'response' consistently here
-                response = model.generate_content(prompt)
-                memo_text = response.text
+        # AI Strategic Memo Section
+        if st.button("📝 Generate Strategic Memo"):
+            if not api_key:
+                st.error("Missing Google API Key!")
+            else:
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel("gemini-1.5-flash")
+                prompt = f"System: CRO. Risk PD: {res['pd']:.2f}. Decision: {res['decision']}. Exposure: {latest['total_ead']}. Generate a 3-paragraph strategic memo."
                 
-                # 3. Display and PDF logic (also indented)
-                st.markdown(memo_text)
-                
-                pdf_metrics = {
-                    "PD Score": f"{res['pd']:.2f}",
-                    "Category": res['category'],
-                    "Decision": res['decision']
-                }
-                
-                pdf_file = create_cro_report(memo_text, pdf_metrics) 
-                st.download_button("📕 Download PDF", pdf_file, "CRO_Memo.pdf")
-        # ✅ MUST be inside
-# 1. Start the action with a button
-    with st.spinner("CRO is analyzing..."):
-        # This creates the 'response' object
-        response = model.generate_content(full_prompt)
-        
-        # NOW you extract the text (Inside the block)
-        
-            # Define metrics specifically for this report
-pdf_metrics = {
-        "Total Exposure": 	f"${latest['total_ead']:,.0f}",
-        "EL Rate": f"{latest['el_rate']*100:.2f}%",
-        "VaR (99%)": f"${latest['var_99']:,.0f}",
-        "HHI Index": f"{latest['sector_hhi']:.4f}"
-            }
+                with st.spinner("AI drafting report..."):
+                    response = model.generate_content(prompt)
+                    memo_text = response.text
+                    st.markdown(memo_text)
+                    
+                    pdf_metrics = {"PD Score": f"{res['pd']:.2f}", "Category": res['category'], "Total Exposure": f"${latest['total_ead']:,.0f}"}
+                    pdf_file = create_cro_report(memo_text, pdf_metrics)
+                    st.download_button("📕 Download PDF", pdf_file, "CRO_Memo.pdf")
 
-# Run Logic
-features = {
-        'LoanAmount': loan_amount,
-        'Income': income,
-        'CreditScore': credit_score,
-        'MarketVolatility': market_vol
-    }
-st.info("Step 2: Risk Scoring Engine Running...")
-pd_score = calculate_pd(features)
-st.info("Step 3: Decision Engine Evaluating...")
-decision = decision_engine(pd_score)
-category = risk_category(pd_score)
-explanations = explain_risk(features)
-recommendation = business_recommendation(pd_score, decision)
-st.info("Step 4: Generating Explainability...")
-explanations = explain_risk(features)
-recommendation = business_recommendation(pd_score, decision)
-    
-    # SAVE TO SESSION STATE (Correctly Indented)
-st.session_state.results = {
-        "pd": pd_score,
-        "decision": decision,
-        "category": category,
-        "explanations": explanations,
-        "recommendation": recommendation,
-        "features": features
-    }
-st.session_state.analysis_done = True
-st.success("Analysis Complete!")
+# ---------------- 5. AUDIT LOG (Bottom of App) ----------------
 
-# Generate the PDF and store it
-# 1. THE TRIGGER
-if st.button("Generate Strategic Memo"):
-    with st.spinner("AI is drafting the risk assessment..."):
-        
-        # 2. CREATE THE TEXT (This defines 'memo_text')
-        response = model.generate_content(prompt)
-        memo_text = response.text
-        
-        # 3. DISPLAY & PDF (These MUST be indented 4 spaces to see 'memo_text')
-        if memo_text:
-            st.markdown(memo_text)
-
-            pdf_metrics = {
-                "Total Exposure": f"${latest['total_ead']:,.0f}",
-                "EL Rate": f"{latest['el_rate']*100:.2f}%",
-                "VaR (99%)": f"${latest['var_99']:,.0f}"
-            }
-
-            # Line 269 is now safely inside the block where memo_text exists
-            pdf_file = create_cro_report(memo_text, pdf_metrics) 
-            
-            st.download_button(
-                label="📕 Download Executive Memo (PDF)",
-                data=pdf_file,
-                file_name="CRO_Strategic_Memo.pdf",
-                mime="application/pdf"
-            )
-st.markdown("### 📊 Historical Decisions")
-
-conn = sqlite3.connect("credit_risk.db")
-df = pd.read_sql("SELECT * FROM decisions ORDER BY id DESC", conn)
-conn.close()
-
-st.dataframe(df, width='stretch')
-
-st.markdown("## 📊 Risk Analytics Dashboard")
-
+st.divider()
+st.subheader("📋 Historical Decision Audit Log")
 try:
     conn = sqlite3.connect("credit_risk.db")
-    df = pd.read_sql("SELECT * FROM decisions ORDER BY id DESC", conn)
+    df_history = pd.read_sql("SELECT * FROM decisions ORDER BY id DESC", conn)
     conn.close()
-
-    if df.empty:
-        st.info("No data available. Run some analyses first.")
+    if not df_history.empty:
+        st.dataframe(df_history, width='stretch', hide_index=True)
     else:
-        # ---------------- KPI METRICS ----------------
-        total_cases = len(df)
-        avg_pd = df["pd"].mean()
-        approval_rate = (df["decision"] == "APPROVE").mean() * 100
-
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Total Decisions", total_cases)
-        col2.metric("Average PD", f"{avg_pd:.2f}")
-        col3.metric("Approval Rate", f"{approval_rate:.1f}%")
-
-        # ---------------- DECISION DISTRIBUTION ----------------
-        st.markdown("### 🏦 Decision Distribution")
-        fig_decision = px.pie(df, names="decision", title="Decision Split")
-        st.plotly_chart(fig_decision, width='stretch')
-
-        # ---------------- RISK CATEGORY ----------------
-# Ensure this entire block is indented (usually 8 spaces) 
-        # to stay inside your 'tab' or 'if' container
-        st.markdown("### ⚠️ Risk Category Breakdown")
-        
-        # 1. Data Processing
-        risk_counts = df["category"].value_counts().reset_index()
-        risk_counts.columns = ["category", "count"]
-
-        # 2. Filters (Cleaned up from the stray commas in your snippet)
-        selected_decision = st.selectbox("Filter by Decision", ["All"] + list(df["decision"].unique()))
-        date_range = st.date_input("Select Date Range", [])
-
-        # 3. Chart Logic
-        fig_risk = px.bar(
-            risk_counts, 
-            x="category", 
-            y="count",
-            title="Distribution of Risk Categories",
-            labels={"count": "Count", "category": "Risk Category"},
-            color="category",
-            color_discrete_map={"LOW RISK": "green", "MEDIUM RISK": "orange", "HIGH RISK": "red"}
-        )
-        
-        # 4. Display Chart
-        st.plotly_chart(fig_risk, width='stretch')
-        # ---------------- PD TREND ----------------
-        st.markdown("### 📈 PD Trend Over Time")
-
-        df["timestamp"] = pd.to_datetime(df["timestamp"])
-        df_sorted = df.sort_values("timestamp")
-
-        fig_trend = px.line(df_sorted, x="timestamp", y="pd",
-                            title="PD Over Time")
-        st.plotly_chart(fig_trend, width='stretch')
-
-        # ---------------- SCATTER ANALYSIS ----------------
-        st.markdown("### 🔍 Loan Amount vs Risk (PD)")
-
-        fig_scatter = px.scatter(
-            df,
-            x="loan_amount",
-            y="pd",
-            color="decision",
-            size="income",
-            hover_data=["credit_score"]
-        )
-        st.plotly_chart(fig_scatter, width='stretch')
-
-        # ---------------- RAW DATA ----------------
-        st.markdown("### 📋 Raw Decision Data")
-        st.dataframe(df, width='stretch', hide_index=True)
-
+        st.info("Run an analysis to populate the audit log.")
 except Exception as e:
-    st.warning("Database not available yet. Run analysis first.")
-  
-                # PDF Generation
-pdf_metrics = {
-                    "Total Exposure": f"${latest['total_ead']:,.0f}",
-                    "EL Rate": f"{latest['el_rate']*100:.2f}%",
-                    "VaR (99%)": f"${latest['var_99']:,.0f}",
-                    "HHI Index": f"{latest['sector_hhi']:.4f}"
-	                   }
-memo_text = resp.text
-st.session_state.pdf_file = pdf_file
-if st.button("🚀 Run Agentic Risk Analysis"):
-
-   features = {
-        "LoanAmount": loan_amount,
-        "Income": income,
-        "CreditScore": credit_score,
-        "MarketVolatility": market_vol
-    }
-
-   pd_score = calculate_pd(features)
-   decision = decision_engine(pd_score)
-   category = risk_category(pd_score)
-   explanations = explain_risk(features)
-   recommendation = business_recommendation(pd_score, decision)
-
-# Store EVERYTHING
- # 1. Storing the Analysis Results
-# Everything inside the dictionary must be indented together
-st.session_state.results = {
-    "pd": pd_score,
-    "decision": decision,
-    "category": category,
-    "explanations": explanations,
-    "recommendation": recommendation,
-    "features": features
-}
-
-# This must be at the same level as the st.session_state.results line
-st.session_state.analysis_done = True
-
-# ---------------- 3. DISPLAY RESULTS (Correctly Indented) ----------------
-
-if st.session_state.analysis_done:
-    res = st.session_state.results
-    st.divider()
-    st.success(f"📊 Probability of Default: {res['pd']:.2f}")
-    st.success(f"⚠️ Risk Category: {res['category']}")
-    st.success(f"🏦 Decision: {res['decision']}")
-    
-    st.markdown("### 🔍 Key Risk Drivers")
-    for exp in res["explanations"]:
-        st.write(f"- {exp}")
-
-    st.markdown("### 💼 Business Recommendation")
-    st.info(res["recommendation"])
-
-    # PDF Generation Button (Must stay inside the results check)
-    if st.button("📝 Generate Strategic Memo"):
-        if not api_key:
-            st.error("Missing Google API Key!")
-        else:
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-2.5-flash")
-            
-            # Use current results for context
-            prompt = f"System: CRO. Risk PD: {res['pd']}. Decision: {res['decision']}. Draft a memo."
-            
-            with st.spinner("AI analyzing..."):
-                response = model.generate_content(prompt)
-                memo_text = response.text
-                st.markdown(memo_text)
-                
-                pdf_metrics = {
-                    "PD Score": f"{res['pd']:.2f}",
-                    "Category": res['category'],
-                    "Decision": res['decision']
-                }
-                
-                pdf_file = create_cro_report(memo_text, pdf_metrics) 
-                st.download_button("📕 Download PDF", pdf_file, "CRO_Memo.pdf")
-
-st.markdown("### 📊 Historical Decisions (Audit Log)")
-
-try:
-    conn = sqlite3.connect("credit_risk.db")
-    df = pd.read_sql("SELECT * FROM decisions ORDER BY id DESC", conn)
-    conn.close()
-
-    if not df.empty:
-        st.dataframe(
-    df,
-    width='stretch',
-    hide_index=True
-	)
-    else:
-        st.info("No decisions recorded yet.")
-
-except Exception as e:
-    st.warning("Database not available yet. Run an analysis first.")
+    st.warning("Audit Log initialized. Waiting for first entry.")
