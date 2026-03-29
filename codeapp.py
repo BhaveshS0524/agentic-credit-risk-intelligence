@@ -197,41 +197,74 @@ with tab3:
     st.plotly_chart(fig_vintage, use_container_width=True)
 
 with tab4:
-   st.header("🧠 Agentic CRO Intelligence Desk")
-    st.markdown("### Neural Stress Testing & Strategic Reasoning")
-    
-    # 1. THE ACTION BUTTON (This must come first!)
+    st.header("🧠 Agentic CRO Intelligence Desk")
+
+    st.markdown("### Step 1: Input Borrower Profile")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        loan_amount = st.number_input("Loan Amount", value=100000)
+        income = st.number_input("Annual Income", value=50000)
+
+    with col2:
+        credit_score = st.slider("Credit Score", 300, 900, 650)
+        market_vol = st.slider("Market Volatility Index", 0, 100, 40)
+
     if st.button("🚀 Run Agentic Risk Analysis"):
-        with st.spinner("CRO is analyzing..."):
-            # A. Run calculations
-            ml_prob = calculate_ml_probability()
-            dl_status = neural_stress_test()
-            
-            # B. Call Gemini (The 'response' creator)
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            
-            prompt = f"System: CRO. Context: Exposure {latest['total_ead']}, ML Risk {ml_prob}%, Stress: {dl_status}."
-            
-            # This is the line that creates 'response'
-            response = model.generate_content(prompt)
-            memo_text = response.text  # ✅ INDENTED AND MATCHED
-            
-            # C. Display Results
-            st.success(f"ML Probability of Default: {ml_prob}%")
-            st.markdown(memo_text)
-            
-            # D. Handle PDF Metrics
-            pdf_metrics = {
-                "Total Exposure": f"${latest['total_ead']:,.0f}",
-                "EL Rate": f"{latest['el_rate']*100:.2f}%",
-                "VaR (99%)": f"${latest['var_99']:,.0f}",
-                "HHI Index": f"{latest['sector_hhi']:.4f}"
-            }
-            
-            # E. Generate and Download PDF
-            pdf_file = create_cro_report(memo_text, pdf_metrics)
-            st.download_button("📕 Download PDF Memo", pdf_file, "CRO_Memo.pdf", width='stretch')
+
+        features = {
+            "LoanAmount": loan_amount,
+            "Income": income,
+            "CreditScore": credit_score,
+            "MarketVolatility": market_vol
+        }
+
+        # STEP 1: PD Calculation
+        st.info("Step 2: Risk Scoring Engine Running...")
+        pd_score = calculate_pd(features)
+
+        # STEP 2: Decision
+        st.info("Step 3: Decision Engine Evaluating...")
+        decision = decision_engine(pd_score)
+
+        # STEP 3: Risk Category
+        category = risk_category(pd_score)
+
+        # STEP 4: Explainability
+        st.info("Step 4: Generating Explainability...")
+        explanations = explain_risk(features)
+
+        # STEP 5: Recommendation
+        recommendation = business_recommendation(pd_score, decision)
+
+        # OUTPUTS
+        st.success(f"📊 Probability of Default: {pd_score:.2f}")
+        st.success(f"⚠️ Risk Category: {category}")
+        st.success(f"🏦 Decision: {decision}")
+
+        st.markdown("### 🔍 Key Risk Drivers")
+        for exp in explanations:
+            st.write(f"- {exp}")
+
+        st.markdown("### 💼 Business Recommendation")
+        st.info(recommendation)
+
+        # AGENT MEMORY (IMPROVED)
+        if "history" not in st.session_state:
+            st.session_state.history = []
+
+        st.session_state.history.append({
+            "Loan": loan_amount,
+            "Income": income,
+            "PD": round(pd_score, 2),
+            "Decision": decision,
+            "Category": category
+        })
+
+        st.markdown("### 🧠 Agent Memory (Past Decisions)")
+        st.dataframe(pd.DataFrame(st.session_state.history))
+
        # 4. LLM + PDF GENERATION (ADD HERE)
 memo_text = None
 
