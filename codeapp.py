@@ -382,45 +382,82 @@ try:
 except Exception as e:
     st.warning("Database not available yet. Run analysis first.")
   
-                # PDF Generation
-pdf_metrics = {
-                    "Total Exposure": f"${latest['total_ead']:,.0f}",
-                    "EL Rate": f"{latest['el_rate']*100:.2f}%",
-                    "VaR (99%)": f"${latest['var_99']:,.0f}",
-                    "HHI Index": f"{latest['sector_hhi']:.4f}"
-	                   }
-memo_text = response.text
-st.session_state.pdf_file = pdf_file
+ # PDF Generation
+# 1. The Trigger
 if st.button("🚀 Run Agentic Risk Analysis"):
-
-   features = {
+    # 2. Define the data (INDENTED)
+    features = {
         "LoanAmount": loan_amount,
         "Income": income,
         "CreditScore": credit_score,
         "MarketVolatility": market_vol
     }
 
-   pd_score = calculate_pd(features)
-   decision = decision_engine(pd_score)
-   category = risk_category(pd_score)
-   explanations = explain_risk(features)
-   recommendation = business_recommendation(pd_score, decision)
+    # 3. Run the Engines (INDENTED)
+    pd_score = calculate_pd(features)
+    decision = decision_engine(pd_score)
+    category = risk_category(pd_score)
+    explanations = explain_risk(features)
+    recommendation = business_recommendation(pd_score, decision)
 
-# Store EVERYTHING
- # 1. Storing the Analysis Results
-# Everything inside the dictionary must be indented together
-st.session_state.results = {
-    "pd": pd_score,
-    "decision": decision,
-    "category": category,
-    "explanations": explanations,
-    "recommendation": recommendation,
-    "features": features
-}
+    # 4. Store EVERYTHING (INDENTED)
+    st.session_state.results = {
+        "pd": pd_score,
+        "decision": decision,
+        "category": category,
+        "explanations": explanations,
+        "recommendation": recommendation,
+        "features": features
+    }
+    st.session_state.analysis_done = True
+    st.success("Analysis Complete! View results below.")
 
-# This must be at the same level as the st.session_state.results line
-st.session_state.analysis_done = True
-
+# 5. Display and PDF Generation (Only runs IF analysis_done is True)
+if st.session_state.get('analysis_done'):
+    res = st.session_state.results
+    
+    # 1. Show the basic results first
+    st.divider()
+    st.subheader("📋 Analysis Results")
+    st.write(f"**Decision:** {res['decision']}")
+    st.write(f"**Risk Category:** {res['category']}")
+    
+    # 2. The Strategic AI Button
+    if st.button("📝 Generate AI Strategic Memo & PDF"):
+        if not api_key:
+            st.error("Missing Google API Key in Streamlit Secrets!")
+        else:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            
+            # Context for the AI
+            prompt = f"System: CRO. Risk PD: {res['pd']:.2f}. Decision: {res['decision']}. Category: {res['category']}. Draft a formal 3-paragraph strategic memo."
+            
+            with st.spinner("AI is drafting the executive report..."):
+                # Run AI
+                response = model.generate_content(prompt)
+                memo_text = response.text
+                
+                # Display the text on screen
+                st.markdown("---")
+                st.markdown(memo_text)
+                
+                # 3. Define metrics for the PDF
+                pdf_metrics = {
+                    "PD Score": f"{res['pd']:.2f}",
+                    "Risk Category": res['category'],
+                    "Final Decision": res['decision'],
+                    "Total Exposure": f"${latest['total_ead']:,.0f}"
+                }
+                
+                # 4. Create and provide the Download Button
+                pdf_file = create_cro_report(memo_text, pdf_metrics) 
+                st.download_button(
+                    label="📕 Download Official PDF Memo",
+                    data=pdf_file,
+                    file_name=f"CRO_Report_{datetime.now().strftime('%Y%m%d')}.pdf",
+                    mime="application/pdf"
+                )
 # ---------------- 3. DISPLAY RESULTS (Correctly Indented) ----------------
 
 if st.session_state.analysis_done:
@@ -437,30 +474,7 @@ if st.session_state.analysis_done:
     st.markdown("### 💼 Business Recommendation")
     st.info(res["recommendation"])
 
-    # PDF Generation Button (Must stay inside the results check)
-    if st.button("📝 Generate Strategic Memo"):
-        if not api_key:
-            st.error("Missing Google API Key!")
-        else:
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-2.5-flash")
-            
-            # Use current results for context
-            prompt = f"System: CRO. Risk PD: {res['pd']}. Decision: {res['decision']}. Draft a memo."
-            
-            with st.spinner("AI analyzing..."):
-                response = model.generate_content(prompt)
-                memo_text = response.text
-                st.markdown(memo_text)
-                
-                pdf_metrics = {
-                    "PD Score": f"{res['pd']:.2f}",
-                    "Category": res['category'],
-                    "Decision": res['decision']
-                }
-                
-                pdf_file = create_cro_report(memo_text, pdf_metrics) 
-                st.download_button("📕 Download PDF", pdf_file, "CRO_Memo.pdf")
+ 
 
 st.markdown("### 📊 Historical Decisions (Audit Log)")
 
