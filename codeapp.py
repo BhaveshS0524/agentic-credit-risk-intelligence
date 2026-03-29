@@ -19,24 +19,39 @@ page = st.sidebar.radio("Go to", ["Executive Dashboard", "Vintage Analytics", "A
 
 if page == "Executive Dashboard":
     st.header("📊 Portfolio Overview")
-     data = [["Metric", "Value"]]
+     def create_cro_report(report_text, metrics_dict):
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    
+    content = []
+    content.append(Paragraph("<b>CONFIDENTIAL: Strategic Risk & Capital Report</b>", styles["Title"]))
+    content.append(Spacer(1, 12))
+    
+    # Add a summary table of current KPIs
+    data = [["Metric", "Value"]]
     for k, v in metrics_dict.items():
         data.append([k, v])
+    
     t = Table(data, colWidths=[200, 100])
     t.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('GRID', (0, 0), (-1, -1), 1, colors.black)
     ]))
     content.append(t)
     content.append(Spacer(1, 20))
 
-    # AI Insights
+    # AI Insights Section
+    content.append(Paragraph("<b>AI-Generated Risk Assessment:</b>", styles["Heading2"]))
     paragraphs = report_text.split('\n')
     for p in paragraphs:
         if p.strip():
             clean_p = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', p)
             content.append(Paragraph(clean_p, styles["Normal"]))
             content.append(Spacer(1, 8))
+
     doc.build(content)
     buffer.seek(0)
     return buffer
