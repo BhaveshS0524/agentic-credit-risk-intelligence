@@ -294,7 +294,7 @@ try:
         # ---------------- RISK CATEGORY ----------------
         st.markdown("### ⚠️ Risk Category Breakdown")
         risk_counts = df["category"].value_counts().reset_index()
-	risk_counts.columns = ["category", "count"]
+	    risk_counts.columns = ["category", "count"]
 
 	fig_risk = px.bar(risk_counts, x="category", y="count"),
 			selected_decision = st.selectbox("Filter by Decision", ["All"] + list(df["decision"].unique())),
