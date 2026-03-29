@@ -117,12 +117,11 @@ if "history" not in st.session_state:
     st.session_state.history = []
 if "logged" not in st.session_state:
     st.session_state.logged = False
-
     st.markdown("### 🧠 Agent Memory (Past Decisions)")
     st.dataframe(pd.DataFrame(st.session_state.history))
 
-st.sidebar.header("🤖 AI CRO Settings")
-api_key = st.secrets.get("GOOGLE_API_KEY")
+    st.sidebar.header("🤖 AI CRO Settings")
+    api_key = st.secrets.get("GOOGLE_API_KEY")
 
 # Create Tabs
 tab1, tab2, tab3, tab4 = st.tabs([
