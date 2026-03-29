@@ -29,32 +29,22 @@ elif page == "Agentic CRO Desk":
     st.header("🧠 Agentic CRO Intelligence Desk")
     st.markdown("### Neural Stress Testing & Strategic Reasoning")
     
-    # 1. Add your Machine Learning Prediction logic here
-def neural_stress_test(macro_data):
-    # A simple Neural Network to simulate complex banking stress tests
-    nn_model = tf.keras.Sequential([
-        tf.keras.layers.Dense(12, activation='relu', input_shape=(macro_data.shape[1],)),
-        tf.keras.layers.Dense(8, activation='relu'),
-        tf.keras.layers.Dense(1, activation='sigmoid')
-    ])
-    
-    # This predicts 'Portfolio Tail Risk' under stress
-    stress_score = nn_model.predict(macro_data)
-    return stress_score
+def calculate_ml_probability():
+    # Simulated ML Logic for the Portfolio
+    return round(np.random.uniform(5.5, 12.8), 2)
 
-    # 2. Add your Deep Learning Stress Test here
-# New Agentic Prompt
-prompt = f"""
-You are the Chief Risk Officer AI. 
-The Machine Learning model predicts a {ml_probability}% probability of default.
-The Deep Learning Stress Test shows a {dl_stress_score} impact on Capital Adequacy.
+def neural_stress_test():
+    # Simulates a Deep Learning score
+    scores = ["High Risk", "Moderate Risk", "Stable"]
+    return np.random.choice(scores)
 
-    # 3. Add the Gemini "Strategic Memo" prompt here
-Write a Strategic Memo explaining:
-1. Why the ML model flagged this specific borrower.
-2. How the Stress Test affects our Basel III compliance.
-3. Your final 'Credit Decision' (Approve/Reject/Mitigate).
-"""
+def create_cro_report(report_text, metrics_dict):
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    content = []
+    content.append(Paragraph("<b>CONFIDENTIAL: Strategic Risk & Capital Report</b>", styles["Title"]))
+    content.append(Spacer(1, 12))
 
 
 # This function replaces your simple 'calculate_risk'
@@ -182,24 +172,7 @@ with tab3:
 
 # --- TAB 4: AI CRO DESK ---
 with tab4:
-    st.header("🧠 Agentic CRO Intelligence Desk")
-    st.markdown("### Neural Stress Testing & Strategic Reasoning")
-    
-    col_l, col_r = st.columns(2)
-    
-    with col_l:
-        if st.button("🚀 Run AI Risk Assessment"):
-            # 1. RUN ML & DL Logic
-            ml_prob = calculate_ml_probability()
-            dl_status = neural_stress_test()
-            
-            st.success(f"ML Probability of Default: {ml_prob}%")
-            st.info(f"Deep Learning Stress Status: {dl_status}")
-
-# 4. Finally, send it to Gemini
-# response = model.generate_content(prompt)   
-
-st.header("Ask the Virtual Chief Risk Officer")
+    st.header("Ask the Virtual Chief Risk Officer")
     user_input = st.text_area("Analyze the current portfolio risks and suggest capital allocation strategies:")
     
     if st.button("Generate Strategic Memo"):
