@@ -285,7 +285,7 @@ memo_text = resp.text
 if memo_text:
     st.markdown(memo_text)
 
-        pdf_metrics = {
+pdf_metrics = {
             "Total Exposure": f"${latest['total_ead']:,.0f}",
             "EL Rate": f"{latest['el_rate']*100:.2f}%",
             "VaR (99%)": f"${latest['var_99']:,.0f}",
