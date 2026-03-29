@@ -19,17 +19,7 @@ page = st.sidebar.radio("Go to", ["Executive Dashboard", "Vintage Analytics", "A
 
 if page == "Executive Dashboard":
     st.header("📊 Portfolio Overview")
-     latest = portfolio_df.iloc[-1]
-    prev = portfolio_df.iloc[-2]
-    
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Total Exposure (EAD)", f"${latest['total_ead']/1e9:.1f}B", f"{((latest['total_ead']/prev['total_ead'])-1)*100:.1f}%")
-    m2.metric("EL Rate", f"{latest['el_rate']*100:.2f}%")
-    m3.metric("99% VaR", f"${latest['var_99']/1e6:.1f}M")
-    m4.metric("Sector Concentration (HHI)", f"{latest['sector_hhi']:.3f}")
-    
-    fig_ead = px.area(portfolio_df, x='date', y='total_ead', title="Portfolio Exposure Growth", color_discrete_sequence=['#636EFA'])
-    st.plotly_chart(fig_ead, use_container_width=True)
+     
 
 elif page == "Vintage Analytics":
     with tab2:
