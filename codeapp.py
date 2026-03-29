@@ -418,8 +418,7 @@ if st.button("🚀 Run Agentic Risk Analysis"):
    st.session_state.analysis_done = True
 
 if st.session_state.analysis_done:
-
-   res = st.session_state.results
+res = st.session_state.results
 
    st.success(f"📊 Probability of Default: {res['pd']:.2f}")
    st.success(f"⚠️ Risk Category: {res['category']}")
