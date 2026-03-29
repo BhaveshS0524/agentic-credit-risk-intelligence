@@ -292,17 +292,31 @@ try:
         st.plotly_chart(fig_decision, width='stretch')
 
         # ---------------- RISK CATEGORY ----------------
+# Ensure this entire block is indented (usually 8 spaces) 
+        # to stay inside your 'tab' or 'if' container
         st.markdown("### ⚠️ Risk Category Breakdown")
+        
+        # 1. Data Processing
         risk_counts = df["category"].value_counts().reset_index()
-	    risk_counts.columns = ["category", "count"]
+        risk_counts.columns = ["category", "count"]
 
-	fig_risk = px.bar(risk_counts, x="category", y="count"),
-			selected_decision = st.selectbox("Filter by Decision", ["All"] + list(df["decision"].unique())),
-			date_range = st.date_input("Select Date Range", []),
-                         x="category", y="count",
-                         labels={"count": "Count", "category": "Risk"})
+        # 2. Filters (Cleaned up from the stray commas in your snippet)
+        selected_decision = st.selectbox("Filter by Decision", ["All"] + list(df["decision"].unique()))
+        date_range = st.date_input("Select Date Range", [])
+
+        # 3. Chart Logic
+        fig_risk = px.bar(
+            risk_counts, 
+            x="category", 
+            y="count",
+            title="Distribution of Risk Categories",
+            labels={"count": "Count", "category": "Risk Category"},
+            color="category",
+            color_discrete_map={"LOW RISK": "green", "MEDIUM RISK": "orange", "HIGH RISK": "red"}
+        )
+        
+        # 4. Display Chart
         st.plotly_chart(fig_risk, width='stretch')
-
         # ---------------- PD TREND ----------------
         st.markdown("### 📈 PD Trend Over Time")
 
