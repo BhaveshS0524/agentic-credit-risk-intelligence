@@ -132,8 +132,12 @@ api_key = st.secrets.get("GOOGLE_API_KEY")
 
 # ---------------- 4. MAIN TABS ----------------
 # Create Tabs for a clean Professional UI
-tab1, tab2, tab3 = st.tabs(["📊 Portfolio Dashboard", "📅 Vintage Analytics", "🤖 Agentic CRO Desk"])
-
+tab1, tab2, tab3, tab4 = st.tabs([
+    "📈 Portfolio Health", 
+    "🌪️ Stress Test Lab", 
+    "🍷 Vintage Analysis", 
+    "🧠 AI CRO Desk"
+])
 # --- TAB 1: EXECUTIVE KPIs ---
 with tab1:
     latest = portfolio_df.iloc[-1]
