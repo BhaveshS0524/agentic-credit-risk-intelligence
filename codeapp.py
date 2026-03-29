@@ -228,11 +228,11 @@ if st.button("🚀 Run Agentic Risk Analysis"):
         # NOW you extract the text (Inside the block)
         
             # Define metrics specifically for this report
-            pdf_metrics = {
-                "Total Exposure": 	f"${latest['total_ead']:,.0f}",
-                "EL Rate": f"{latest['el_rate']*100:.2f}%",
-                "VaR (99%)": f"${latest['var_99']:,.0f}",
-                "HHI Index": f"{latest['sector_hhi']:.4f}"
+pdf_metrics = {
+        "Total Exposure": 	f"${latest['total_ead']:,.0f}",
+        "EL Rate": f"{latest['el_rate']*100:.2f}%",
+        "VaR (99%)": f"${latest['var_99']:,.0f}",
+        "HHI Index": f"{latest['sector_hhi']:.4f}"
             }
 
     # Run Logic
