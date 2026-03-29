@@ -9,9 +9,55 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from io import BytesIO
 import re
-from sklearn.ensemble import RandomForestClassifier
 import numpy as np
-import tensorflow as tf
+
+def calculate_pd(features):
+    """Deterministic PD calculation (more realistic than random)"""
+    score = (
+        0.3 * (features['LoanAmount'] / 500000) +
+        0.2 * (1 - features['CreditScore'] / 900) +
+        0.2 * (features['MarketVolatility'] / 100) +
+        0.3 * (features['LoanAmount'] / max(features['Income'], 1))
+    )
+    return min(max(score, 0), 1)
+
+
+def decision_engine(pd):
+    if pd < 0.3:
+        return "APPROVE"
+    elif pd < 0.7:
+        return "REVIEW"
+    return "REJECT"
+
+
+def explain_risk(features):
+    explanations = []
+
+    if features['CreditScore'] < 600:
+        explanations.append("Low credit score increasing default risk")
+
+    if features['LoanAmount'] > features['Income'] * 5:
+        explanations.append("High loan-to-income ratio")
+
+    if features['MarketVolatility'] > 60:
+        explanations.append("Unstable market conditions")
+
+    return explanations if explanations else ["Stable financial profile"]
+
+def risk_category(pd):
+    if pd < 0.3:
+        return "LOW RISK"
+    elif pd < 0.7:
+        return "MEDIUM RISK"
+    return "HIGH RISK"
+
+def business_recommendation(pd, decision):
+    if decision == "APPROVE":
+        return "Proceed with standard loan approval."
+    elif decision == "REVIEW":
+        return "Request additional documents or collateral."
+    else:
+        return "Reject or reduce loan exposure."
 
 # ---------------- 1. FUNCTIONS (Instructions First) ----------------
 
@@ -23,14 +69,6 @@ def neural_stress_test():
     """Simulates a Deep Learning risk score"""
     scores = ["High Risk", "Moderate Risk", "Stable"]
     return np.random.choice(scores)
-
-def predict_credit_risk_ml(features_df):
-    """Simulates a live ML model training/prediction cycle"""
-    X = features_df[['LoanAmount', 'Income', 'CreditScore', 'MarketVolatility']]
-    model = RandomForestClassifier(n_estimators=100)
-    model.fit(np.random.rand(5, 4), [0, 1, 0, 1, 0]) 
-    prob = model.predict_proba(np.random.rand(1, 4))[0][1]
-    return prob
 
 def create_cro_report(report_text, metrics_dict):
     """Generates a professional PDF report for the CRO"""
@@ -140,45 +178,103 @@ with tab3:
 
 with tab4:
     st.header("🧠 Agentic CRO Intelligence Desk")
-    
-    # Part A: Automated Assessment
-    st.markdown("### Neural Stress Testing & Automated Reasoning")
-    if st.button("🚀 Run AI Risk Assessment"):
-        ml_prob = calculate_ml_probability()
-        dl_status = neural_stress_test()
-        
-        st.success(f"ML Probability of Default: {ml_prob}%")
-        st.info(f"Deep Learning Stress Status: {dl_status}")
 
+    st.markdown("### Step 1: Input Borrower Profile")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        loan_amount = st.number_input("Loan Amount", value=100000)
+        income = st.number_input("Annual Income", value=50000)
+
+    with col2:
+        credit_score = st.slider("Credit Score", 300, 900, 650)
+        market_vol = st.slider("Market Volatility Index", 0, 100, 40)
+
+    if st.button("🚀 Run Agentic Risk Analysis"):
+
+        features = {
+            "LoanAmount": loan_amount,
+            "Income": income,
+            "CreditScore": credit_score,
+            "MarketVolatility": market_vol
+        }
+
+        # STEP 1: PD Calculation
+        st.info("Step 2: Risk Scoring Engine Running...")
+        pd_score = calculate_pd(features)
+
+        # STEP 2: Decision
+        st.info("Step 3: Decision Engine Evaluating...")
+        decision = decision_engine(pd_score)
+
+        # STEP 3: Risk Category
+        category = risk_category(pd_score)
+
+        # STEP 4: Explainability
+        st.info("Step 4: Generating Explainability...")
+        explanations = explain_risk(features)
+
+        # STEP 5: Recommendation
+        recommendation = business_recommendation(pd_score, decision)
+
+        # OUTPUTS
+        st.success(f"📊 Probability of Default: {pd_score:.2f}")
+        st.success(f"⚠️ Risk Category: {category}")
+        st.success(f"🏦 Decision: {decision}")
+
+        st.markdown("### 🔍 Key Risk Drivers")
+        for exp in explanations:
+            st.write(f"- {exp}")
+
+        st.markdown("### 💼 Business Recommendation")
+        st.info(recommendation)
+
+        # AGENT MEMORY (IMPROVED)
+        if "history" not in st.session_state:
+            st.session_state.history = []
+
+        st.session_state.history.append({
+            "Loan": loan_amount,
+            "Income": income,
+            "PD": round(pd_score, 2),
+            "Decision": decision,
+            "Category": category
+        })
+
+        st.markdown("### 🧠 Agent Memory (Past Decisions)")
+        st.dataframe(pd.DataFrame(st.session_state.history))
+
+        # LLM INSIGHTS
         if api_key:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel("gemini-2.5-flash")
-            with st.spinner("Analyzing..."):
-                prompt = f"System: CRO. Context: Exposure {latest['total_ead']}, ML Risk {ml_prob}%, Stress: {dl_status}. Draft a mitigation plan."
-                resp = model.generate_content(prompt)
-                st.markdown(resp.text)
-    
-    st.divider()
 
-    # Part B: Manual Query
-    st.header("Ask the Virtual Chief Risk Officer")
-    user_input = st.text_area("Analyze the current portfolio risks and suggest capital allocation strategies:")
-    
-    if st.button("Generate Strategic Memo"):
-        if not api_key:
-            st.error("Please configure GOOGLE_API_KEY in secrets.")
-        else:
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-2.5-flash")
-            
-            context = f"Exposure: {latest['total_ead']}, EL Rate: {latest['el_rate']}, HHI: {latest['sector_hhi']}, VaR: {latest['var_99']}"
-            
-            with st.spinner("CRO is analyzing..."):
-                full_prompt = f"System: Chief Risk Officer. Context: {context}. Question: {user_input}"
-                response = model.generate_content(full_prompt)
-                memo_text = response.text
+            prompt = f"""
+            You are a Chief Risk Officer.
+
+            Borrower Profile:
+            Loan: {loan_amount}
+            Income: {income}
+            Credit Score: {credit_score}
+            Market Volatility: {market_vol}
+
+            PD: {pd_score}
+            Risk Category: {category}
+            Decision: {decision}
+
+            Provide:
+            1. Risk reasoning
+            2. Financial risks
+            3. Mitigation strategies
+            """
+
+            with st.spinner("AI generating strategic insight..."):
+                resp = model.generate_content(prompt)
+                memo_text = resp.text  # ✅ FIXED
+
                 st.markdown(memo_text)
-                
+
                 # PDF Generation
                 pdf_metrics = {
                     "Total Exposure": f"${latest['total_ead']:,.0f}",
@@ -186,5 +282,23 @@ with tab4:
                     "VaR (99%)": f"${latest['var_99']:,.0f}",
                     "HHI Index": f"{latest['sector_hhi']:.4f}"
                 }
+
                 pdf_file = create_cro_report(memo_text, pdf_metrics)
+
+                st.download_button(
+                    "📕 Download Executive Memo (PDF)",
+                    pdf_file,
+                    "CRO_Strategic_Memo.pdf",
+                    "application/pdf"
+                )
+
+          
+                # PDF Generation
+                pdf_metrics = {
+                    "Total Exposure": f"${latest['total_ead']:,.0f}",
+                    "EL Rate": f"{latest['el_rate']*100:.2f}%",
+                    "VaR (99%)": f"${latest['var_99']:,.0f}",
+                    "HHI Index": f"{latest['sector_hhi']:.4f}"
+                }
+                memo_text = resp.text
                 st.download_button("📕 Download Executive Memo (PDF)", pdf_file, "CRO_Strategic_Memo.pdf", "application/pdf")
