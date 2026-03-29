@@ -266,17 +266,33 @@ st.session_state.analysis_done = True
 st.success("Analysis Complete!")
 
 # Generate the PDF and store it
-pdf_file = create_cro_report(memo_text, pdf_metrics)
-            
-# Show the download button only AFTER the file is ready
-st.download_button(
-        label="📕 Download Executive Memo (PDF)",
-        data=pdf_file,
-        file_name="CRO_Strategic_Memo.pdf",
-        mime="application/pdf"
-        )   
+# 1. THE TRIGGER
+if st.button("Generate Strategic Memo"):
+    with st.spinner("AI is drafting the risk assessment..."):
+        
+        # 2. CREATE THE TEXT (This defines 'memo_text')
+        response = model.generate_content(prompt)
+        memo_text = response.text
+        
+        # 3. DISPLAY & PDF (These MUST be indented 4 spaces to see 'memo_text')
+        if memo_text:
+            st.markdown(memo_text)
 
-st.markdown("### 📊 Historical Decisions")
+            pdf_metrics = {
+                "Total Exposure": f"${latest['total_ead']:,.0f}",
+                "EL Rate": f"{latest['el_rate']*100:.2f}%",
+                "VaR (99%)": f"${latest['var_99']:,.0f}"
+            }
+
+            # Line 269 is now safely inside the block where memo_text exists
+            pdf_file = create_cro_report(memo_text, pdf_metrics) 
+            
+            st.download_button(
+                label="📕 Download Executive Memo (PDF)",
+                data=pdf_file,
+                file_name="CRO_Strategic_Memo.pdf",
+                mime="application/pdf"
+            )st.markdown("### 📊 Historical Decisions")
 
 conn = sqlite3.connect("credit_risk.db")
 df = pd.read_sql("SELECT * FROM decisions ORDER BY id DESC", conn)
