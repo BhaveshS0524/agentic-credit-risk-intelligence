@@ -295,7 +295,7 @@ if st.button("Generate Strategic Memo"):
             )
 st.markdown("### 📊 Historical Decisions")
 
-conn = sqlite3.connect("credit_risk.db")
+conn = sqlite3.connect("credit_ratings.db")
 df = pd.read_sql("SELECT * FROM decisions ORDER BY id DESC", conn)
 conn.close()
 
@@ -467,10 +467,6 @@ if st.session_state.analysis_done:
 
     st.markdown("### 💼 Business Recommendation")
     st.info(res["recommendation"])
-
- 
-
-st.markdown("### 📊 Historical Decisions (Audit Log)")
 
 st.divider()
 st.subheader("📋 Historical Decision Audit Log")
