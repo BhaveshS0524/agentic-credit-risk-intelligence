@@ -72,9 +72,6 @@ elif nav_selection == "🍷 Vintage Analysis":
     st.plotly_chart(fig_vintage, use_container_width=True)
 
 
-elif nav_selection == "🧠 AI CRO Desk":
-    st.header("🧠 Agentic CRO Intelligence Desk")
-    st.markdown("### Neural Network Risk Assessment & Strategic Reasoning")
    elif nav_selection == "🧠 AI CRO Desk:"
     st.header("🧠 Agentic CRO Intelligence Desk")
     st.markdown("### Neural Stress Testing & Strategic Reasoning")
