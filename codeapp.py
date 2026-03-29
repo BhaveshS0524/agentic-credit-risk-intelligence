@@ -292,7 +292,7 @@ pdf_metrics = {
             "HHI Index": f"{latest['sector_hhi']:.4f}"
         }
 
-        st.session_state.pdf_file = create_cro_report(memo_text, pdf_metrics)   
+st.session_state.pdf_file = create_cro_report(memo_text, pdf_metrics)   
                        
                 # PDF Generation
 pdf_metrics = {
@@ -305,7 +305,7 @@ memo_text = resp.text
 st.session_state.pdf_file = pdf_file
 if st.button("🚀 Run Agentic Risk Analysis"):
 
-    features = {
+   features = {
         "LoanAmount": loan_amount,
         "Income": income,
         "CreditScore": credit_score,
