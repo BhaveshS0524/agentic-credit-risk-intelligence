@@ -307,7 +307,7 @@ pdf_metrics = {
                     "VaR (99%)": f"${latest['var_99']:,.0f}",
                     "HHI Index": f"{latest['sector_hhi']:.4f}"
 	                   }
-                memo_text = resp.text
+memo_text = resp.text
 st.session_state.pdf_file = pdf_file
 if st.button("🚀 Run Agentic Risk Analysis"):
 
