@@ -280,19 +280,36 @@ if st.session_state.get("analysis_done", False) and api_key:
         resp = model.generate_content(prompt)
 
         # ✅ MUST be inside
-memo_text = response.text
+# 1. Start the action with a button
+if st.button("Generate Strategic Memo"):
+    with st.spinner("CRO is analyzing..."):
+        # This creates the 'response' object
+        response = model.generate_content(full_prompt)
+        
+        # NOW you extract the text (Inside the block)
+        memo_text = response.text
 
-if memo_text:
-    st.markdown(memo_text)
+        if memo_text:
+            st.markdown(memo_text)
 
-pdf_metrics = {
-            "Total Exposure": f"${latest['total_ead']:,.0f}",
-            "EL Rate": f"{latest['el_rate']*100:.2f}%",
-            "VaR (99%)": f"${latest['var_99']:,.0f}",
-            "HHI Index": f"{latest['sector_hhi']:.4f}"
-        }
+            # Define metrics specifically for this report
+            pdf_metrics = {
+                "Total Exposure": f"${latest['total_ead']:,.0f}",
+                "EL Rate": f"{latest['el_rate']*100:.2f}%",
+                "VaR (99%)": f"${latest['var_99']:,.0f}",
+                "HHI Index": f"{latest['sector_hhi']:.4f}"
+            }
 
-st.session_state.pdf_file = create_cro_report(memo_text, pdf_metrics)   
+            # Generate the PDF and store it
+            pdf_file = create_cro_report(memo_text, pdf_metrics)
+            
+            # Show the download button only AFTER the file is ready
+            st.download_button(
+                label="📕 Download Executive Memo (PDF)",
+                data=pdf_file,
+                file_name="CRO_Strategic_Memo.pdf",
+                mime="application/pdf"
+            )   
                        
                 # PDF Generation
 pdf_metrics = {
