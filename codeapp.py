@@ -384,8 +384,9 @@ except Exception as e:
   
  # PDF Generation
 # 1. The Trigger
+# ---------------- STEP 1: THE ANALYSIS BUTTON ----------------
 if st.button("🚀 Run Agentic Risk Analysis"):
-    # 2. Define the data (INDENTED)
+    # Define features inside the button
     features = {
         "LoanAmount": loan_amount,
         "Income": income,
@@ -393,14 +394,14 @@ if st.button("🚀 Run Agentic Risk Analysis"):
         "MarketVolatility": market_vol
     }
 
-    # 3. Run the Engines (INDENTED)
+    # Run the math
     pd_score = calculate_pd(features)
     decision = decision_engine(pd_score)
     category = risk_category(pd_score)
     explanations = explain_risk(features)
     recommendation = business_recommendation(pd_score, decision)
 
-    # 4. Store EVERYTHING (INDENTED)
+    # Store in session state
     st.session_state.results = {
         "pd": pd_score,
         "decision": decision,
@@ -412,52 +413,45 @@ if st.button("🚀 Run Agentic Risk Analysis"):
     st.session_state.analysis_done = True
     st.success("Analysis Complete! View results below.")
 
-# 5. Display and PDF Generation (Only runs IF analysis_done is True)
+# ---------------- STEP 2: RESULTS & AI MEMO ----------------
 if st.session_state.get('analysis_done'):
     res = st.session_state.results
     
-    # 1. Show the basic results first
     st.divider()
-    st.subheader("📋 Analysis Results")
-    st.write(f"**Decision:** {res['decision']}")
-    st.write(f"**Risk Category:** {res['category']}")
+    st.subheader("📋 Executive Risk Summary")
+    st.info(f"**Decision:** {res['decision']} | **Risk Category:** {res['category']}")
+    st.write(f"**Probability of Default:** {res['pd']:.2f}")
     
-    # 2. The Strategic AI Button
-    if st.button("📝 Generate AI Strategic Memo & PDF"):
+    # Nested Button for AI & PDF
+    if st.button("📝 Generate Strategic AI Memo"):
         if not api_key:
             st.error("Missing Google API Key in Streamlit Secrets!")
         else:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel("gemini-1.5-flash")
             
-            # Context for the AI
-            prompt = f"System: CRO. Risk PD: {res['pd']:.2f}. Decision: {res['decision']}. Category: {res['category']}. Draft a formal 3-paragraph strategic memo."
+            prompt = f"System: CRO. Risk PD: {res['pd']:.2f}. Decision: {res['decision']}. Draft a formal memo."
             
-            with st.spinner("AI is drafting the executive report..."):
-                # Run AI
+            with st.spinner("AI is generating strategic insight..."):
+                # Define 'response' here
                 response = model.generate_content(prompt)
-                memo_text = response.text
+                memo_text = response.text # Safe because it's inside the button
                 
-                # Display the text on screen
                 st.markdown("---")
                 st.markdown(memo_text)
                 
-                # 3. Define metrics for the PDF
+                # Prepare PDF Metrics
                 pdf_metrics = {
-                    "PD Score": f"{res['pd']:.2f}",
-                    "Risk Category": res['category'],
-                    "Final Decision": res['decision'],
-                    "Total Exposure": f"${latest['total_ead']:,.0f}"
+                    "Total Exposure": f"${latest['total_ead']:,.0f}",
+                    "EL Rate": f"{latest['el_rate']*100:.2f}%",
+                    "VaR (99%)": f"${latest['var_99']:,.0f}",
+                    "HHI Index": f"{latest['sector_hhi']:.4f}"
                 }
                 
-                # 4. Create and provide the Download Button
+                # Create and Download
                 pdf_file = create_cro_report(memo_text, pdf_metrics) 
-                st.download_button(
-                    label="📕 Download Official PDF Memo",
-                    data=pdf_file,
-                    file_name=f"CRO_Report_{datetime.now().strftime('%Y%m%d')}.pdf",
-                    mime="application/pdf"
-                )
+                st.download_button("📕 Download PDF Report", pdf_file, "CRO_Strategic_Memo.pdf")
+
 # ---------------- 3. DISPLAY RESULTS (Correctly Indented) ----------------
 
 if st.session_state.analysis_done:
