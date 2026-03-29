@@ -312,38 +312,38 @@ if st.button("🚀 Run Agentic Risk Analysis"):
         "MarketVolatility": market_vol
     }
 
-    pd_score = calculate_pd(features)
-    decision = decision_engine(pd_score)
-    category = risk_category(pd_score)
-    explanations = explain_risk(features)
-    recommendation = business_recommendation(pd_score, decision)
+   pd_score = calculate_pd(features)
+   decision = decision_engine(pd_score)
+   category = risk_category(pd_score)
+   explanations = explain_risk(features)
+   recommendation = business_recommendation(pd_score, decision)
 
-    # Store EVERYTHING
-    st.session_state.results = {
+# Store EVERYTHING
+   st.session_state.results = {
         "pd": pd_score,
         "decision": decision,
         "category": category,
         "explanations": explanations,
         "recommendation": recommendation,
         "features": features
-    }
+   }
 
-    st.session_state.analysis_done = True
+   st.session_state.analysis_done = True
 
 if st.session_state.analysis_done:
 
-    res = st.session_state.results
+   res = st.session_state.results
 
-    st.success(f"📊 Probability of Default: {res['pd']:.2f}")
-    st.success(f"⚠️ Risk Category: {res['category']}")
-    st.success(f"🏦 Decision: {res['decision']}")
+   st.success(f"📊 Probability of Default: {res['pd']:.2f}")
+   st.success(f"⚠️ Risk Category: {res['category']}")
+   st.success(f"🏦 Decision: {res['decision']}")
 
-    st.markdown("### 🔍 Key Risk Drivers")
-    for exp in res["explanations"]:
+   st.markdown("### 🔍 Key Risk Drivers")
+   for exp in res["explanations"]:
         st.write(f"- {exp}")
 
-    st.markdown("### 💼 Business Recommendation")
-    st.info(res["recommendation"])
+   st.markdown("### 💼 Business Recommendation")
+   st.info(res["recommendation"])
 
 # 5. DOWNLOAD BUTTON (ALWAYS LAST)
 if st.session_state.pdf_file is not None:
