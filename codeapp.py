@@ -280,7 +280,7 @@ if st.session_state.get("analysis_done", False) and api_key:
         resp = model.generate_content(prompt)
 
         # ✅ MUST be inside
-         memo_text = resp.text
+memo_text = resp.text
 
 if memo_text:
     st.markdown(memo_text)
