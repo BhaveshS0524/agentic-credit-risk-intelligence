@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import sqlite3
 import plotly.express as px
 import plotly.graph_objects as go
 import google.generativeai as genai
@@ -310,7 +311,82 @@ if st.button("Generate Strategic Memo"):
                 file_name="CRO_Strategic_Memo.pdf",
                 mime="application/pdf"
             )   
-                       
+
+st.markdown("### 📊 Historical Decisions")
+
+conn = sqlite3.connect("credit_risk.db")
+df = pd.read_sql("SELECT * FROM decisions ORDER BY id DESC", conn)
+conn.close()
+
+st.dataframe(df, width='stretch')
+
+st.markdown("## 📊 Risk Analytics Dashboard")
+
+try:
+    conn = sqlite3.connect("credit_risk.db")
+    df = pd.read_sql("SELECT * FROM decisions ORDER BY id DESC", conn)
+    conn.close()
+
+    if df.empty:
+        st.info("No data available. Run some analyses first.")
+    else:
+        # ---------------- KPI METRICS ----------------
+        total_cases = len(df)
+        avg_pd = df["pd"].mean()
+        approval_rate = (df["decision"] == "APPROVE").mean() * 100
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Total Decisions", total_cases)
+        col2.metric("Average PD", f"{avg_pd:.2f}")
+        col3.metric("Approval Rate", f"{approval_rate:.1f}%")
+
+        # ---------------- DECISION DISTRIBUTION ----------------
+        st.markdown("### 🏦 Decision Distribution")
+        fig_decision = px.pie(df, names="decision", title="Decision Split")
+        st.plotly_chart(fig_decision, width='stretch')
+
+        # ---------------- RISK CATEGORY ----------------
+        st.markdown("### ⚠️ Risk Category Breakdown")
+        fig_risk = risk_counts = df["category"].value_counts().reset_index()
+risk_counts.columns = ["category", "count"]
+
+fig_risk = px.bar(risk_counts, x="category", y="count"),
+			selected_decision = st.selectbox("Filter by Decision", ["All"] + list(df["decision"].unique())),
+			date_range = st.date_input("Select Date Range", []),
+                         x="category", y="count",
+                         labels={"count": "Count", "category": "Risk"})
+        st.plotly_chart(fig_risk, width='stretch')
+
+        # ---------------- PD TREND ----------------
+        st.markdown("### 📈 PD Trend Over Time")
+
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        df_sorted = df.sort_values("timestamp")
+
+        fig_trend = px.line(df_sorted, x="timestamp", y="pd",
+                            title="PD Over Time")
+        st.plotly_chart(fig_trend, width='stretch')
+
+        # ---------------- SCATTER ANALYSIS ----------------
+        st.markdown("### 🔍 Loan Amount vs Risk (PD)")
+
+        fig_scatter = px.scatter(
+            df,
+            x="loan_amount",
+            y="pd",
+            color="decision",
+            size="income",
+            hover_data=["credit_score"]
+        )
+        st.plotly_chart(fig_scatter, width='stretch')
+
+        # ---------------- RAW DATA ----------------
+        st.markdown("### 📋 Raw Decision Data")
+        st.dataframe(df, width='stretch', hide_index=True)
+
+except Exception as e:
+    st.warning("Database not available yet. Run analysis first.")
+  
                 # PDF Generation
 pdf_metrics = {
                     "Total Exposure": f"${latest['total_ead']:,.0f}",
@@ -373,3 +449,22 @@ if st.button("Generate Strategic Memo"):
         # Line 350 is now safely inside the 'if' block
         pdf_file = create_cro_report(memo_text, pdf_metrics) 
         st.download_button("📕 Download PDF", pdf_file, "Memo.pdf")
+
+st.markdown("### 📊 Historical Decisions (Audit Log)")
+
+try:
+    conn = sqlite3.connect("credit_risk.db")
+    df = pd.read_sql("SELECT * FROM decisions ORDER BY id DESC", conn)
+    conn.close()
+
+    if not df.empty:
+        st.dataframe(
+    df,
+    width='stretch',
+    hide_index=True
+	)
+    else:
+        st.info("No decisions recorded yet.")
+
+except Exception as e:
+    st.warning("Database not available yet. Run an analysis first.")
