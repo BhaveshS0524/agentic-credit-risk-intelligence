@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # CreditGuard AI - README Generator
 # Updated with Technical Methodology for BFSI Consultation
 
