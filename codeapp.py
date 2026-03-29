@@ -172,7 +172,7 @@ with tab1:
     m4.metric("Sector Concentration (HHI)", f"{latest['sector_hhi']:.3f}")
     
     fig_ead = px.area(portfolio_df, x='date', y='total_ead', title="Portfolio Exposure Growth", color_discrete_sequence=['#636EFA'])
-    st.plotly_chart(fig_ead, use_container_width=True)
+    st.plotly_chart(fig_ead, width='stretch')
 
 with tab2:
     st.header("🌪️ Macroeconomic Stress Simulation")
@@ -269,7 +269,6 @@ with tab4:
        # 4. LLM + PDF GENERATION (ADD HERE)
 memo_text = None
 
-if st.session_state.get("analysis_done", False) and api_key:
     res = st.session_state.results
 
     genai.configure(api_key=api_key)
@@ -282,17 +281,12 @@ if st.session_state.get("analysis_done", False) and api_key:
 
         # ✅ MUST be inside
 # 1. Start the action with a button
-if st.button("Generate Strategic Memo"):
     with st.spinner("CRO is analyzing..."):
         # This creates the 'response' object
         response = model.generate_content(full_prompt)
         
         # NOW you extract the text (Inside the block)
-        memo_text = response.text
-
-        if memo_text:
-            st.markdown(memo_text)
-
+        
             # Define metrics specifically for this report
             pdf_metrics = {
                 "Total Exposure": f"${latest['total_ead']:,.0f}",
@@ -347,10 +341,10 @@ try:
 
         # ---------------- RISK CATEGORY ----------------
         st.markdown("### ⚠️ Risk Category Breakdown")
-        fig_risk = risk_counts = df["category"].value_counts().reset_index()
-risk_counts.columns = ["category", "count"]
+        risk_counts = df["category"].value_counts().reset_index()
+	risk_counts.columns = ["category", "count"]
 
-fig_risk = px.bar(risk_counts, x="category", y="count"),
+	fig_risk = px.bar(risk_counts, x="category", y="count"),
 			selected_decision = st.selectbox("Filter by Decision", ["All"] + list(df["decision"].unique())),
 			date_range = st.date_input("Select Date Range", []),
                          x="category", y="count",
