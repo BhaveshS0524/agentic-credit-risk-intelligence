@@ -75,7 +75,7 @@ elif nav_selection == "🍷 Vintage Analysis":
 elif nav_selection == "🧠 AI CRO Desk":
     st.header("🧠 Agentic CRO Intelligence Desk")
     st.markdown("### Neural Network Risk Assessment & Strategic Reasoning")
-   elif nav_selection == "🧠 AI CRO Desk":
+   elif nav_selection == "🧠 AI CRO Desk:"
     st.header("🧠 Agentic CRO Intelligence Desk")
     st.markdown("### Neural Stress Testing & Strategic Reasoning")
     
