@@ -1,6 +1,9 @@
-# CreditGuard AI - README Generator
-# Created for: Bhavesh Suryavanshi (AI Solutions Consultant)
+#!/bin/bash
 
+# CreditGuard AI - README Generator
+# Updated with Technical Methodology for BFSI Consultation
+
+cat << 'EOF' > README.md
 # 🏛️ CreditGuard AI: Institutional Risk & Capital Orchestrator
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -17,52 +20,53 @@ In the current volatile macroeconomic environment, financial institutions face a
 * **Agentic CRO Desk:** A Generative AI layer (**Gemini 1.5 Flash**) that acts as a virtual Chief Risk Officer to draft executive memos and regulatory responses.
 
 ## 🏗️ Technical Architecture
-The platform is built on a high-concurrency Python stack designed for rapid deployment and modular integration into enterprise data lakes.
-
 * **Frontend:** Streamlit (Enterprise UI/UX)
-* **Intelligence Layer:** Google Gemini 1.5 Flash (Large Language Model)
-* **Data Analytics:** Pandas & NumPy for high-speed credit telemetry processing
-* **Visualization:** Plotly Dynamic Financial Charting (Area, Bar, and Line Cohorts)
-* **Reporting:** ReportLab PDF Engine for automated regulatory memo generation
+* **Intelligence Layer:** Google Gemini 1.5 Flash (Agentic Reasoning)
+* **Data Analytics:** Pandas & NumPy (Credit Telemetry Processing)
+* **Visualization:** Plotly (Institutional Financial Charting)
+* **Reporting:** ReportLab PDF Engine (Automated Regulatory Memos)
+
+## 🛡️ Technical Methodology & Risk Logic
+
+### 1. Value at Risk (VaR 99%) Calculation
+The system utilizes a **Parametric Variance-Covariance approach** to estimate potential portfolio loss. 
+* **Logic:** We calculate the maximum loss the portfolio could sustain over a 1-year horizon with 99% confidence. This is critical for determining **Economic Capital** requirements.
+
+### 2. Concentration Risk (HHI Index)
+The engine calculates the **Herfindahl-Hirschman Index** across industrial sectors.
+* **Logic:** An HHI above **0.15** is flagged as a "Significant Concentration Risk," prompting an immediate re-balancing strategy recommendation from the AI CRO.
+
+### 3. IFRS 9 Vintage Analysis & ECL Staging
+The "Vintage Auditor" module tracks the **Cumulative Default Rate** by origination cohort. 
+* **Logic:** By comparing the 2023 cohort against the 2015 "Gold Standard" at identical **Months on Books (MOB)**, the system identifies **Significant Increase in Credit Risk (SICR)**, allowing for early asset migration from Stage 1 to Stage 2.
 
 ## 📊 Core Modules
-
-### 1. Portfolio Health Analytics
-Tracks the "Vital Signs" of the credit book, including:
-* **Total EAD (Exposure at Default):** Live tracking of total capital at risk.
-* **99% VaR (Value at Risk):** Quantifying the maximum potential loss over a 1-year horizon.
-* **Sector HHI:** Monitoring concentration risk to prevent over-exposure to specific industries.
-
-### 2. Macro Stress Testing Lab
-Allows risk managers to simulate macroeconomic shocks (GDP, Unemployment, Interest Rates) and view the immediate impact on:
-* **Probability of Default (PD) Uplift**
-* **Expected Loss (EL) Increase**
-* **RWA (Risk-Weighted Assets) Impact**
-
-### 3. Vintage & Cohort Auditor
-A deep-dive tool for analyzing loan performance by "Origination Quarter." This module identifies credit deterioration in newer vintages (e.g., 2023 Q4) compared to historical benchmarks (e.g., 2015 Q1).
+* **Portfolio Health Analytics:** Live tracking of EAD, VaR, and HHI.
+* **Macro Stress Testing Lab:** Simulating GDP and Unemployment shocks on PD/LGD.
+* **Vintage & Cohort Auditor:** Identifying credit deterioration in newer vintages.
 
 ## 🛠️ Installation & Deployment
-
-### Local Environment Setup
 \`\`\`bash
 # Clone the repository
-git clone https://github.com/your-username/agentic-credit-risk-intelligence.git
+git clone https://github.com/BhaveshS0524/agentic-credit-risk-intelligence.git
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Configure Environment Variables
-# Create a .streamlit/secrets.toml file:
+# Configure Environment Variables in .streamlit/secrets.toml:
 GOOGLE_API_KEY = "YOUR_API_KEY"
 
 # Launch the orchestrator
 streamlit run codeapp.py
 \`\`\`
 
-## 🔒 Security & Compliance
-* **Data Residency:** This prototype is designed for VPC deployment (Vertex AI) to ensure sensitive banking data remains within the institutional perimeter.
-* **Contextual Grounding:** The AI Agent is grounded strictly in the provided credit telemetry, ensuring all strategic advice is data-backed and follows financial logic.
-
 ## 👨‍💻 Author
-**Bhavesh Suryavanshi** *AI Solutions Consultant | BFSI Specialist* [LinkedIn Profile](https://www.linkedin.com/in/bhaveshsuryavanshi/)
+**Bhavesh Suryavanshi**
+*AI Solutions Consultant | BFSI Specialist*
+[LinkedIn Profile](https://www.linkedin.com/in/bhavesh-suryavanshi-89596043/)
+
+---
+*Disclaimer: This tool is a decision-support prototype and should be used in conjunction with internal institutional risk models and human oversight.*
+EOF
+
+echo "✅ Professional README.md with Technical Methodology has been generated!"
