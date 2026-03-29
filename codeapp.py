@@ -75,41 +75,39 @@ elif nav_selection == "🍷 Vintage Analysis":
 elif nav_selection == "🧠 AI CRO Desk":
     st.header("🧠 Agentic CRO Intelligence Desk")
     st.markdown("### Neural Network Risk Assessment & Strategic Reasoning")
-   st.header("Ask the Virtual Chief Risk Officer")
-    user_input = st.text_area("Analyze the current portfolio risks and suggest capital allocation strategies:")
+   elif nav_selection == "🧠 AI CRO Desk":
+    st.header("🧠 Agentic CRO Intelligence Desk")
+    st.markdown("### Neural Stress Testing & Strategic Reasoning")
     
-    if st.button("Generate Strategic Memo"):
+    # --- 1. THE ACTION BUTTON ---
+    if st.button("🚀 Run AI Risk Assessment"):
+        
+        # All logic below MUST be indented further (8 spaces) 
+        # because it is inside the 'if st.button' block
+        ml_prob = calculate_ml_probability()
+        dl_status = neural_stress_test()
+        
+        st.success(f"ML Probability of Default: {ml_prob}%")
+        
+        # --- 2. AI GENERATION ---
+        api_key = st.secrets.get("GOOGLE_API_KEY")
         if not api_key:
-            st.error("Please configure GOOGLE_API_KEY in secrets.")
+            st.error("Missing API Key!")
         else:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-2.5-flash")
+            model = genai.GenerativeModel("gemini-1.5-flash")
             
-            # Context injection for the AI
-            context = f"""
-            Current Portfolio Metrics:
-            - Exposure: {latest['total_ead']}
-            - Expected Loss Rate: {latest['el_rate']}
-            - Sector HHI: {latest['sector_hhi']}
-            - 99% VaR: {latest['var_99']}
-            """
+            # The prompt is also indented
+            prompt = f"Analyze exposure {latest['total_ead']} with ML Risk {ml_prob}%."
             
             with st.spinner("CRO is analyzing..."):
-                full_prompt = f"System: You are a Chief Risk Officer at a global bank. Context: {context}. Question: {user_input}"
-                response = model.generate_content(full_prompt)
-                memo_text = response.text
-                st.markdown(memo_text)
+                response = model.generate_content(prompt)
+                st.markdown(response.text)
                 
-                # Metrics for PDF table
-                pdf_metrics = {
-                    "Total Exposure": f"${latest['total_ead']:,.0f}",
-                    "EL Rate": f"{latest['el_rate']*100:.2f}%",
-                    "VaR (99%)": f"${latest['var_99']:,.0f}",
-                    "HHI Index": f"{latest['sector_hhi']:.4f}"
-                }
-                
-                pdf_file = create_cro_report(memo_text, pdf_metrics)
-                st.download_button("📕 Download Executive Memo (PDF)", pdf_file, "CRO_Strategic_Memo.pdf", "application/pdf")
+    # --- 3. THE HEADER THAT WAS CAUSING THE ERROR ---
+    # This should be at the same level as the 'if st.button' (4 spaces)
+    st.header("Ask the Virtual Chief Risk Officer")
+    user_query = st.text_input("Enter a custom scenario analysis query:")
 
 
 def calculate_ml_probability():
