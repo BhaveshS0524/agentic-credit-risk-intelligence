@@ -179,7 +179,7 @@ with col2:
     market_vol = st.slider("Market Volatility Index", 0, 100, 40)
 
 # The Main Analysis Button
-if st.button("🚀 Run Agentic Risk Analysis"):
+if st.button("🚀 Run Agentic Risk Analysis", key="analysis_btn_1"):
     features = {
         'LoanAmount': loan_amount,
         'Income': income,
@@ -385,7 +385,7 @@ except Exception as e:
  # PDF Generation
 # 1. The Trigger
 # ---------------- STEP 1: THE ANALYSIS BUTTON ----------------
-if st.button("🚀 Run Agentic Risk Analysis"):
+if st.button("🚀 Run Agentic Risk Analysis", key="analysis_btn_2"):
     # Define features inside the button
     features = {
         "LoanAmount": loan_amount,
