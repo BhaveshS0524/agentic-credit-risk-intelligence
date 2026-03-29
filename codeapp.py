@@ -136,13 +136,15 @@ if st.session_state.get("analysis_done", False):
     if "history" not in st.session_state:
         st.session_state.history = []
 
-    st.session_state.history.append({
-        "Loan": res["features"]["LoanAmount"],
-        "Income": res["features"]["Income"],
-        "PD": round(res["pd"], 2),
-        "Decision": res["decision"],
-        "Category": res["category"]
-    })
+    if not st.session_state.get("logged", False):
+        st.session_state.history.append({
+            "Loan": res["features"]["LoanAmount"],
+            "Income": res["features"]["Income"],
+            "PD": round(res["pd"], 2),
+            "Decision": res["decision"],
+            "Category": res["category"]
+        })
+        st.session_state.logged = True
 
     st.markdown("### 🧠 Agent Memory (Past Decisions)")
     st.dataframe(pd.DataFrame(st.session_state.history))
