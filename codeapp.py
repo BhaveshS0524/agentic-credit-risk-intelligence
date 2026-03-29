@@ -187,10 +187,7 @@ if st.button("🚀 Run Agentic Risk Analysis"):
         'MarketVolatility': market_vol
     }
 
-        st.markdown("### 🧠 Agent Memory (Past Decisions)")
-        st.dataframe(pd.DataFrame(st.session_state.history))
-
-       # 4. LLM + PDF GENERATION (ADD HERE)
+# 4. LLM + PDF GENERATION (ADD HERE)
 memo_text = None
 
     res = st.session_state.results
