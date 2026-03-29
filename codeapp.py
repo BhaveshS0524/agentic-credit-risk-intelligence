@@ -19,15 +19,27 @@ page = st.sidebar.radio("Go to", ["Executive Dashboard", "Vintage Analytics", "A
 
 if page == "Executive Dashboard":
     st.header("📊 Portfolio Overview")
-    with tab1:
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Total Exposure", f"${latest['total_ead']/1e9:.1f}B")
-    m2.metric("EL Rate", f"{latest['el_rate']*100:.2f}%")
-    m3.metric("99% VaR", f"${latest['var_99']/1e6:.1f}M")
-    
-    fig = px.area(portfolio_df, x='date', y='total_ead', title="Exposure Growth")
-    st.plotly_chart(fig, use_container_width=True)
+     data = [["Metric", "Value"]]
+    for k, v in metrics_dict.items():
+        data.append([k, v])
+    t = Table(data, colWidths=[200, 100])
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    content.append(t)
+    content.append(Spacer(1, 20))
 
+    # AI Insights
+    paragraphs = report_text.split('\n')
+    for p in paragraphs:
+        if p.strip():
+            clean_p = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', p)
+            content.append(Paragraph(clean_p, styles["Normal"]))
+            content.append(Spacer(1, 8))
+    doc.build(content)
+    buffer.seek(0)
+    return buffer
 
 elif page == "Vintage Analytics":
     with tab2:
