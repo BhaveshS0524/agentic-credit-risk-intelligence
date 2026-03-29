@@ -347,8 +347,8 @@ if st.session_state.analysis_done:
 
 # 5. DOWNLOAD BUTTON (ALWAYS LAST)
 if st.session_state.pdf_file is not None:
-    st.download_button(
-        "📕 Download Executive Memo (PDF)",
+pdf_file = create_cro_report(memo_text, pdf_metrics)
+            st.download_button("📕 Download PDF", pdf_file, "Memo.pdf",
         st.session_state.pdf_file,
         "CRO_Strategic_Memo.pdf",
         "application/pdf",
