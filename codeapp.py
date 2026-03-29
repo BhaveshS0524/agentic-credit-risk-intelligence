@@ -301,4 +301,10 @@ with tab4:
                     "HHI Index": f"{latest['sector_hhi']:.4f}"
                 }
                 memo_text = resp.text
-                st.download_button("📕 Download Executive Memo (PDF)", pdf_file, "CRO_Strategic_Memo.pdf", "application/pdf")
+                st.download_button(
+    "📕 Download Executive Memo (PDF)",
+    pdf_file,
+    "CRO_Strategic_Memo.pdf",
+    "application/pdf",
+    key=f"download_{loan_amount}_{income}_{pd_score}"
+)
