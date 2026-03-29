@@ -346,11 +346,13 @@ if st.session_state.analysis_done:
    st.info(res["recommendation"])
 
 # 5. DOWNLOAD BUTTON (ALWAYS LAST)
-if st.session_state.pdf_file is not None:
-pdf_file = create_cro_report(memo_text, pdf_metrics)
-            st.download_button("📕 Download PDF", pdf_file, "Memo.pdf",
-        st.session_state.pdf_file,
-        "CRO_Strategic_Memo.pdf",
-        "application/pdf",
-        key="final_pdf_download"
-    )
+if st.button("Generate Strategic Memo"):
+    # Everything below is indented 4 spaces
+    with st.spinner("Analyzing..."):
+        response = model.generate_content(prompt)
+        memo_text = response.text
+        st.markdown(memo_text)
+        
+        # Line 350 is now safely inside the 'if' block
+        pdf_file = create_cro_report(memo_text, pdf_metrics) 
+        st.download_button("📕 Download PDF", pdf_file, "Memo.pdf")
