@@ -19,42 +19,17 @@ page = st.sidebar.radio("Go to", ["Executive Dashboard", "Vintage Analytics", "A
 
 if page == "Executive Dashboard":
     st.header("📊 Portfolio Overview")
-     def create_cro_report(report_text, metrics_dict):
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-    styles = getSampleStyleSheet()
+     latest = portfolio_df.iloc[-1]
+    prev = portfolio_df.iloc[-2]
     
-    content = []
-    content.append(Paragraph("<b>CONFIDENTIAL: Strategic Risk & Capital Report</b>", styles["Title"]))
-    content.append(Spacer(1, 12))
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Total Exposure (EAD)", f"${latest['total_ead']/1e9:.1f}B", f"{((latest['total_ead']/prev['total_ead'])-1)*100:.1f}%")
+    m2.metric("EL Rate", f"{latest['el_rate']*100:.2f}%")
+    m3.metric("99% VaR", f"${latest['var_99']/1e6:.1f}M")
+    m4.metric("Sector Concentration (HHI)", f"{latest['sector_hhi']:.3f}")
     
-    # Add a summary table of current KPIs
-    data = [["Metric", "Value"]]
-    for k, v in metrics_dict.items():
-        data.append([k, v])
-    
-    t = Table(data, colWidths=[200, 100])
-    t.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black)
-    ]))
-    content.append(t)
-    content.append(Spacer(1, 20))
-
-    # AI Insights Section
-    content.append(Paragraph("<b>AI-Generated Risk Assessment:</b>", styles["Heading2"]))
-    paragraphs = report_text.split('\n')
-    for p in paragraphs:
-        if p.strip():
-            clean_p = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', p)
-            content.append(Paragraph(clean_p, styles["Normal"]))
-            content.append(Spacer(1, 8))
-
-    doc.build(content)
-    buffer.seek(0)
-    return buffer
+    fig_ead = px.area(portfolio_df, x='date', y='total_ead', title="Portfolio Exposure Growth", color_discrete_sequence=['#636EFA'])
+    st.plotly_chart(fig_ead, use_container_width=True)
 
 elif page == "Vintage Analytics":
     with tab2:
