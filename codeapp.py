@@ -129,20 +129,14 @@ st.title("🏛️ Institutional Credit Risk & Capital Orchestrator")
 st.markdown("_Advanced Decision Support for BFSI Consultants_")
 
 # ---------------- SESSION STATE INIT ----------------
-if "analysis_done" not in st.session_state:
-    st.session_state.analysis_done = False
+if st.session_state.get("analysis_done", False):
 
-if "results" not in st.session_state:
-    st.session_state.results = {}
+    res = st.session_state.results
 
-if "pdf_file" not in st.session_state:
-    st.session_state.pdf_file = None
-
-if "history" not in st.session_state:
+    if "history" not in st.session_state:
         st.session_state.history = []
 
-st.session_state.history.append
-    ({
+    st.session_state.history.append({
         "Loan": res["features"]["LoanAmount"],
         "Income": res["features"]["Income"],
         "PD": round(res["pd"], 2),
