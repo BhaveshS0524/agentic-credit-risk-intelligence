@@ -247,16 +247,16 @@ recommendation = business_recommendation(pd_score, decision)
     
     # SAVE TO SESSION STATE (Correctly Indented)
 
-            # Generate the PDF and store it
-            pdf_file = create_cro_report(memo_text, pdf_metrics)
+# Generate the PDF and store it
+pdf_file = create_cro_report(memo_text, pdf_metrics)
             
-            # Show the download button only AFTER the file is ready
-            st.download_button(
-                label="📕 Download Executive Memo (PDF)",
-                data=pdf_file,
-                file_name="CRO_Strategic_Memo.pdf",
-                mime="application/pdf"
-            )   
+# Show the download button only AFTER the file is ready
+st.download_button(
+        label="📕 Download Executive Memo (PDF)",
+        data=pdf_file,
+        file_name="CRO_Strategic_Memo.pdf",
+        mime="application/pdf"
+        )   
 
 st.markdown("### 📊 Historical Decisions")
 
