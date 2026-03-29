@@ -188,14 +188,37 @@ if st.button("🚀 Run Agentic Risk Analysis"):
     }
 
 # 4. LLM + PDF GENERATION (ADD HERE)
-memo_text = None
-res = st.session_state.results
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.5-flash")
-    prompt = f"..."
-    with st.spinner("AI generating strategic insight..."):
-        resp = model.generate_content(prompt)
-
+# 1. Start with the button
+    if st.button("Generate Strategic Memo"):
+        # 2. All these lines below must be indented 4 spaces
+        memo_text = None
+        res = st.session_state.results
+        
+        if not api_key:
+            st.error("Missing API Key!")
+        else:
+            genai.configure(api_key=api_key)
+            # Use 1.5-flash for better stability in 2026
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            
+            prompt = f"System: CRO. Risk PD: {res['pd']:.2f}. Decision: {res['decision']}. Draft memo."
+            
+            with st.spinner("AI generating strategic insight..."):
+                # We use 'response' consistently here
+                response = model.generate_content(prompt)
+                memo_text = response.text
+                
+                # 3. Display and PDF logic (also indented)
+                st.markdown(memo_text)
+                
+                pdf_metrics = {
+                    "PD Score": f"{res['pd']:.2f}",
+                    "Category": res['category'],
+                    "Decision": res['decision']
+                }
+                
+                pdf_file = create_cro_report(memo_text, pdf_metrics) 
+                st.download_button("📕 Download PDF", pdf_file, "CRO_Memo.pdf")
         # ✅ MUST be inside
 # 1. Start the action with a button
     with st.spinner("CRO is analyzing..."):
